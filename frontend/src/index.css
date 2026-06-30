@@ -1,0 +1,44 @@
+.navbar{
+    background-color: #fac5dd;
+    /* justify-content: center; */
+}
+
+.nav-logo{
+    justify-content: center;
+}
+
+.nav-left{
+    justify-content: left;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.container{
+    gap: 20px;
+    width: 70%;
+}
+
+.container-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.btn-pink {
+    background-color: #fac5dd;
+    border-color: #fac5dd;
+    color: white;
+}
+.btn-pink:hover,
+.btn-pink:active,
+.btn-pink:focus {
+    background-color: #faa5cb;
+    border-color: #fcb3d4;
+    color: white;
+}
+
+.text-pink {
+    color: #fac5dd;
+}
