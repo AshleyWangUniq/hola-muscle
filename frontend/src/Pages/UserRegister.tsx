@@ -82,7 +82,7 @@ function UserRegister() {
         <button className="btn btn-pink" type="submit">Register</button>
         <hr className="hr"></hr>
         <p>Already have an account? 
-            <a className="text-pink" href="/NewMovement"> Log in</a>
+            <a className="text-pink" href="/LogIn"> Log in</a>
         </p>
     </form>
     </div>

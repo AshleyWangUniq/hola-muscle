@@ -19,7 +19,7 @@ function NavBar() {
           const token = localStorage.getItem("token");
 
           if (!token) return;
-          console.log("Token is:", token);
+          // console.log("Token is:", token);
 
           const response = await fetch("http://localhost:3000/api/profile", {
             method: "GET",

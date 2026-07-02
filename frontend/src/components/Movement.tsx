@@ -3,10 +3,10 @@ import { useLocation } from 'react-router-dom';
 
 
 interface Movement {
-    id : number;
+    id: string;
   name: string;
   description: string;
-  musclegroups: string[];
+  muscleGroups: string[];
   equipments: string[];
   images : string[];
 }
@@ -21,7 +21,22 @@ function Movement(name : MovementName) {
 
 
     async function fetchMOvementsByMuscle(muscle : string) {
-        const res = await fetch(`http://localhost:3000/api/movements?muscleGroup=${muscle}`);
+        const token = localStorage.getItem("token");
+
+        const headers : HeadersInit = {
+            "Content-Type": "application/json",
+        }
+
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`http://localhost:3000/api/movements?muscleGroup=${muscle}`,
+            {
+                method: "GET",
+                headers,
+            },
+        );
         const data: Movement[] = await res.json();
         setMovements(data);
     }
@@ -40,7 +55,7 @@ function Movement(name : MovementName) {
                         <div className='card-body'>
                             <h5 className='card-title'>{mov.name}</h5>
                             <p className='card-text'>{mov.description}</p>
-                            <h6>Targeted Muscle Groups{mov.musclegroups.map((muscle) => (
+                            <h6>Targeted Muscle Groups{mov.muscleGroups.map((muscle) => (
                                 <span className='badge text-bg-secondary'>{muscle}</span>
                             ))}</h6>
                         </div>

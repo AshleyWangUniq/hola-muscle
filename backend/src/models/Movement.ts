@@ -1,24 +1,39 @@
-import mongoose from "mongoose";
+import mongoose,{ Types } from "mongoose";
 
-const movementSchema = new mongoose.Schema({
+interface IMovement {
+  name: string;
+  description: string;
+  muscleGroups: string[];
+  equipment: string[];
+  isPublic: boolean;
+  belongsTo: Types.ObjectId;
+//   images : string[];
+}
+
+const movementSchema = new mongoose.Schema<IMovement>({
     name:{
         type:String,
-        require: true,
+        required: true,
+    },
+
+    description: {
+        type:String,
+        required: true,
     },
 
     muscleGroups:{
         type: [String],
-        require: true,
+        required: true,
     },
 
-    equipments:{
+    equipment:{
         type: [String],
         default:[],
     },
 
     isPublic:{
         type: Boolean,
-        require: true,
+        required: true,
     },
 
     belongsTo:{
@@ -26,8 +41,12 @@ const movementSchema = new mongoose.Schema({
         ref:"User",
         defualt:null,
     },
+
+    // images: {
+    // }
+
 });
 
-const Movement = mongoose.model("Movement", movementSchema);
+const Movement = mongoose.model<IMovement>("Movement", movementSchema);
 
-export default Movement;
+export default Movement; 

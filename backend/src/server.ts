@@ -3,21 +3,27 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import User from "./models/User";
+import Movement from "./models/Movement";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
+import { AuthRequest, authMiddleware, optionalAuthMiddleware } from "./routes/movements";
 // import User from "./models/user";
 
 dotenv.config();
 
 const app = express();
+const route = express.Router();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
 app.use(cors());
 app.use(express.json());
+app.use(route);
 console.log(process.env.MONGO_URI);
 
+
+//MongoDB connection, server starter
 if (!MONGO_URI) {
   throw new Error("No MONGO_URI found in the .env file");
 }
@@ -30,43 +36,110 @@ mongoose.connect(MONGO_URI)
 })
 .catch((error)=>{console.error("MongoDB connection failed", error)});
 
-// app.use()
-
-interface MyJwtPayload extends JwtPayload {
-  userId: string;
-}
-
-interface Movement {
-  id: number;
-  name: string;
-  description: string;
-  musclegroups: string[];
-  equipments: string[];
-  images : string[];
-}
-
-const movements: Movement[] = [];
-
 app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
 
-app.post("/api/movements", (req, res) => {
-  const newMovement : Movement = {
-    id: Date.now(),
-    ...req.body,
-  };
+interface MyJwtPayload extends JwtPayload {
+  userId: string;
+}
 
-  movements.push(newMovement);
-  console.log(movements);
-  res.status(201).json(newMovement);
+
+//movements creation, fetch 
+// interface Movement {
+//   id: number;
+//   name: string;
+//   description: string;
+//   muscleGroups: string[];
+//   equipments: string[];
+//   images : string[];
+// }
+
+// const movements: Movement[] = [];
+
+route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
+ try{
+  const {name, description, muscleGroups, equipment} = req.body;
+  if (!req.user) return res.status(401).json({message: "No user found"});
+  console.log("name:", name, "\ndescription:", description, "\nmuscleGroups", muscleGroups);
+  console.log("equipment:", equipment, "\nbelongsTo:", req.user.id);
+
+  const newMov = await Movement.create({
+    name,
+    description,
+    muscleGroups,
+    equipment,
+    isPublic: false,
+    belongsTo: req.user.id,
+  });
+
+  res.status(201).json(newMov);
+
+ } catch (err) {
+  res.status(500).json({message: "Failed to create movement!"});
+ }
 });
 
+route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res) => {
+  try {
+    console.log("welcome to route get");
+    const targetMuscle = req.query.muscleGroup as string;
+    let movements;
+
+    if (targetMuscle) {
+      if (!req.user) {
+        // return only public mocements 
+        console.log("no user");
+         movements = await Movement.find({isPublic: true, muscleGroups: targetMuscle});
+      } else {
+        //return both public and user movements d
+        console.log("have muscle, and have user ", req.user.id);
+         movements = await Movement.find({muscleGroups: targetMuscle, belongsTo: req.user.id});
+      }
+    } else {
+      console.log("no target muscle");
+       movements = await Movement.find({isPublic: true});
+    }
+    console.log("outside of if", movements);
+    return res.status(200).json(movements);
+  } catch(err) {
+    res.status(500).json({message: "Failed to fetch movements"});
+  }
+});
+// app.post("/api/movements", async(req, res) => {
+//   try{
+//     const {name, description, muscleGroups, equipment} = req.body;
+//   } catch(err) {
+//     res.status(500).json({message: "fail to create a movement"});
+//   }
+//   const newMovement : Movement = {
+//     id: Date.now(),
+//     ...req.body,
+//   };
+
+//   movements.push(newMovement);
+//   console.log(movements);
+//   res.status(201).json(newMovement);
+// });
+
 // app.get("/api/movements", (req, res) => {
-//     res.json(movements);
+//     const muscle = req.query.muscleGroup as string;
+//     console.log("wanted muscle group is " + muscle);
+//     console.log(movements);
+
+//     if (muscle) {
+//         const movementsByMuscle = movements.filter((mov) => mov.muscleGroups.includes(muscle));
+//         console.log(movementsByMuscle);
+//         res.json(movementsByMuscle);
+//     } else {
+//         res.json(movements);
+//     }
 // })
 
+
+
+//User Creation & Fetch(Log In)
 app.post("/api/Users", async (req, res) => {
   try {
     const {firstName, lastName, email, password} = req.body;
@@ -116,19 +189,6 @@ app.post("/api/LogIn", async (req,res) => {
   }
 })
 
-app.get("/api/movements", (req, res) => {
-    const muscle = req.query.muscleGroup as string;
-    console.log("wanted muscle group is" + muscle);
-
-    if (muscle) {
-        const movementsByMuscle = movements.filter((mov) => mov.musclegroups.includes(muscle));
-        console.log(movementsByMuscle);
-        res.json(movementsByMuscle);
-    } else {
-        res.json(movements);
-    }
-})
-
 app.get("/api/profile", async (req, res) => {
   try{
     const authHeader = req.headers.authorization;
@@ -145,7 +205,6 @@ app.get("/api/profile", async (req, res) => {
     }
 
     const token = parse[1]!;
-        console.log("at least got into try part", token);
 
     const decoded = jwt.verify(
       token,
@@ -168,6 +227,3 @@ app.get("/api/profile", async (req, res) => {
     });
   }
 })
-// app.listen(PORT, () => {
-//   console.log(`Server running at http://localhost:${PORT}`);
-// });
