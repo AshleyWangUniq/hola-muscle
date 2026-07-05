@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import User from "./models/User";
+import User, {type IUser} from "./models/User";
 import Movement from "./models/Movement";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -20,7 +20,6 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
 app.use(route);
-console.log(process.env.MONGO_URI);
 
 
 //MongoDB connection, server starter
@@ -40,30 +39,15 @@ app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
-
 interface MyJwtPayload extends JwtPayload {
   userId: string;
 }
 
 
-//movements creation, fetch 
-// interface Movement {
-//   id: number;
-//   name: string;
-//   description: string;
-//   muscleGroups: string[];
-//   equipments: string[];
-//   images : string[];
-// }
-
-// const movements: Movement[] = [];
-
 route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
  try{
   const {name, description, muscleGroups, equipment} = req.body;
   if (!req.user) return res.status(401).json({message: "No user found"});
-  console.log("name:", name, "\ndescription:", description, "\nmuscleGroups", muscleGroups);
-  console.log("equipment:", equipment, "\nbelongsTo:", req.user.id);
 
   const newMov = await Movement.create({
     name,
@@ -83,65 +67,42 @@ route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
 
 route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res) => {
   try {
-    console.log("welcome to route get");
     const targetMuscle = req.query.muscleGroup as string;
     let movements;
 
     if (targetMuscle) {
       if (!req.user) {
         // return only public mocements 
-        console.log("no user");
          movements = await Movement.find({isPublic: true, muscleGroups: targetMuscle});
       } else {
         //return both public and user movements d
-        console.log("have muscle, and have user ", req.user.id);
          movements = await Movement.find({muscleGroups: targetMuscle, belongsTo: req.user.id});
       }
     } else {
-      console.log("no target muscle");
        movements = await Movement.find({isPublic: true});
     }
-    console.log("outside of if", movements);
     return res.status(200).json(movements);
   } catch(err) {
     res.status(500).json({message: "Failed to fetch movements"});
   }
 });
-// app.post("/api/movements", async(req, res) => {
-//   try{
-//     const {name, description, muscleGroups, equipment} = req.body;
-//   } catch(err) {
-//     res.status(500).json({message: "fail to create a movement"});
-//   }
-//   const newMovement : Movement = {
-//     id: Date.now(),
-//     ...req.body,
-//   };
-
-//   movements.push(newMovement);
-//   console.log(movements);
-//   res.status(201).json(newMovement);
-// });
-
-// app.get("/api/movements", (req, res) => {
-//     const muscle = req.query.muscleGroup as string;
-//     console.log("wanted muscle group is " + muscle);
-//     console.log(movements);
-
-//     if (muscle) {
-//         const movementsByMuscle = movements.filter((mov) => mov.muscleGroups.includes(muscle));
-//         console.log(movementsByMuscle);
-//         res.json(movementsByMuscle);
-//     } else {
-//         res.json(movements);
-//     }
-// })
 
 
 
 //User Creation & Fetch(Log In)
+
+
+ function tokenGenerator(user: IUser) {
+  return jwt.sign(
+      {userId: user._id},
+      process.env.JWT_SECRET!,
+      {expiresIn: "1d"}
+    )
+}
+
 app.post("/api/Users", async (req, res) => {
   try {
+
     const {firstName, lastName, email, password} = req.body;
 
     const existence = await User.findOne({email});
@@ -160,7 +121,16 @@ app.post("/api/Users", async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json(newUser);
+    const token = tokenGenerator(newUser);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+    }});
   } catch (err) {
     res.status(500).json({ message: "Failed to create user" });
   }
@@ -169,23 +139,25 @@ app.post("/api/Users", async (req, res) => {
 app.post("/api/LogIn", async (req,res) => {
   try {
     const {email, password} = req.body;
-
-    const user = await User.findOne({email});
+    const user = await User.findOne({email}).select("+password");
 
     if (!user) {return res.status(404).json({message: "User not found"});}
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({message: "Incorrect Password"});
     }
-    const token = jwt.sign(
-      {userId: user._id},
-      process.env.JWT_SECRET!,
-      {expiresIn: "1d"}
-    );
+    const token = tokenGenerator(user);
 
-    res.status(200).json({message: `Hi ${user.firstName}, welcome`, token});
+    res.status(200).json({
+      token,
+      user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }});
   } catch(err) {
-    res.status(500).json({ message: "Failed to create user" });
+    res.status(500).json({ message: "Failed to log in" });
   }
 })
 
@@ -193,14 +165,10 @@ app.get("/api/profile", async (req, res) => {
   try{
     const authHeader = req.headers.authorization;
     
-
     if (!authHeader) {return res.status(401).json({message: "No token Provided"});}
-
-
 
     const parse = authHeader.split(" "); 
     if (parse.length !== 2 || parse[0] !== "Bearer") {
-      
       return res.status(401).json({message: "Invalid Authorization",});
     }
 
@@ -211,7 +179,7 @@ app.get("/api/profile", async (req, res) => {
       process.env.JWT_SECRET!
     ) as MyJwtPayload;
 
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({
@@ -219,7 +187,12 @@ app.get("/api/profile", async (req, res) => {
       });
     }
 
-    res.status(200).json(user);
+    res.status(200).json({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    });
   } catch (err) {
     console.log(err);
     res.status(401).json({

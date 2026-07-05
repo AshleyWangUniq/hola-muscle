@@ -13,12 +13,20 @@ export default function BodyPartPage() {
 
   return (
     <>
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+    <div className='container-full'>
+      <div className='row'>
+        <div className='col-8'><Movement name={name} /></div>
+        <div className="col-4">
+          <h1>A list of muscle groups</h1>
+        </div>
+      </div>
+    </div>
+    {/* <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       <h1>{name}</h1>
       <p>A introduction to this body part</p>
 
       <Movement name={name} />
-    </div>
+    </div> */}
     </>
   );
 }

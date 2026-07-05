@@ -1,16 +1,11 @@
-
-// interface User {
-//     id: number;
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-//     password: string;
-// }
-
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
+import type { User } from "../types/user";
+interface LoginPageProps {
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+}
 
-function UserRegister() {
+function UserRegister({setUser}: LoginPageProps) {
 
     const token = localStorage.getItem("token");
     // if (token) {alert(`Hi ${token.}`)}
@@ -45,6 +40,8 @@ function UserRegister() {
 
         const result = await response.json();
         if (response.ok) {
+            localStorage.setItem("token", result.token);
+            setUser(result);
             navigate("/LogIn");
         } else {
             alert(result.message);
@@ -82,7 +79,8 @@ function UserRegister() {
         <button className="btn btn-pink" type="submit">Register</button>
         <hr className="hr"></hr>
         <p>Already have an account? 
-            <a className="text-pink" href="/LogIn"> Log in</a>
+            <Link className="text-pink" to="/LogIn">Log in</Link>
+            {/* <a className="text-pink" href="/LogIn"> Log in</a> */}
         </p>
     </form>
     </div>

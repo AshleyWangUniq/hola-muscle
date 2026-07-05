@@ -19,6 +19,9 @@
     gap: 20px;
     width: 70%;
 }
+.container-full{
+    width: 100%;
+}
 
 .container-grid {
   display: grid;

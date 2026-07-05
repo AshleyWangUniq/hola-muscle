@@ -44,7 +44,7 @@ function Movement(name : MovementName) {
 
     useEffect(()=> {
         fetchMOvementsByMuscle(name.name);
-    }, []);
+    }, [name]);
 
     return (
         <div>
@@ -56,7 +56,7 @@ function Movement(name : MovementName) {
                             <h5 className='card-title'>{mov.name}</h5>
                             <p className='card-text'>{mov.description}</p>
                             <h6>Targeted Muscle Groups{mov.muscleGroups.map((muscle) => (
-                                <span className='badge text-bg-secondary'>{muscle}</span>
+                                <span className='badge text-bg-primary'>{muscle}</span>
                             ))}</h6>
                         </div>
                     </div>
