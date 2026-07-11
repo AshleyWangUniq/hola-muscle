@@ -8,47 +8,14 @@ interface movProp {
 }
 
 function NewMovement(user : movProp) {
-  const [showModal, setShowModal] = useState(true);
   const navigate = useNavigate();
   useEffect(()=> {
-    console.log(user);
     if (user.user) {
-      setShowModal(false);
     }
-    // if (!user.user) {
-    //   alert("Please log in first to create a movement.");
-    //   navigate("/Login");
-    // }
   },[user]);
 
-    // useEffect(()=> {
-    //     async function fetchUser() {
-    //       const token = localStorage.getItem("token");
-
-    //       if (!token) return;
-    //     //   console.log("Token is:", token);
-
-    //       const response = await fetch("http://localhost:3000/api/profile", {
-    //         method: "GET",
-    //         headers: {
-    //           Authorization: `Bearer ${token}`,
-    //         },
-    //       });
-
-    //     //   const result = await response.json();
-
-    //       if (response.ok) {
-    //         setIsLoged(true);
-    //         // setUser(result);
-    //       } else {
-    //         alert("Please log in first");
-    //       }
-    //     } 
-    //     fetchUser();
-    //   },[]);
-
     return <>
-    {showModal && (
+    {!user.user && (
         <div className="modal d-block" tabIndex={-1}>
           <div className="modal-dialog">
             <div className="modal-content">
@@ -63,7 +30,7 @@ function NewMovement(user : movProp) {
               <div className="modal-footer">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => {setShowModal(false); navigate("/");}}
+                  onClick={() => {navigate("/");}}
                 >
                   Cancel
                 </button>
@@ -71,7 +38,6 @@ function NewMovement(user : movProp) {
                 <button
                   className="btn btn-primary"
                   onClick={() => {
-                    setShowModal(false);
                     navigate("/login");
                   }}
                 >
@@ -82,7 +48,7 @@ function NewMovement(user : movProp) {
           </div>
         </div>
       )}
-      {!showModal && <div><MovementGenerator /></div>}
+      {user.user && <div><MovementGenerator /></div>}
     
     {/* {!isLoged && <Navigate to="/Login" />} */}
     </>;

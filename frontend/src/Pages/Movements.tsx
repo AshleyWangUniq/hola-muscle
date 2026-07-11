@@ -1,14 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Movement from '../components/Movement';
+import MuscleList from '../components/MuscleList';
 
 
 
-export default function BodyPartPage() {
+export default function Movements() {
   const location = useLocation();
-  console.log(location.state);
   const name = (location.state as {name : string}).name;
-  console.log(name);
 
 
   return (
@@ -17,16 +16,10 @@ export default function BodyPartPage() {
       <div className='row'>
         <div className='col-8'><Movement name={name} /></div>
         <div className="col-4">
-          <h1>A list of muscle groups</h1>
+          <MuscleList />
         </div>
       </div>
     </div>
-    {/* <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>{name}</h1>
-      <p>A introduction to this body part</p>
-
-      <Movement name={name} />
-    </div> */}
     </>
   );
 }

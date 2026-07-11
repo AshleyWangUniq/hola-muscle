@@ -1,0 +1,17 @@
+export const EQUIPMENT = [
+"Featured",
+"Barbell",
+"Dumbbells",
+"Bodyweight",
+"Machine",
+"Medicine Ball",
+"Kettlebells",
+"Stretches",
+"Cables",
+"Band",
+"Plate",
+"Yoga",
+"Cardio",
+"Recovery",
+"Pilates",
+]

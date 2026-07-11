@@ -1,9 +1,8 @@
-import NavBar from "../components/NavBar";
-import BodyList from "../components/BodyList";
+import MuscleList from "../components/MuscleList";
 
 function HomePage() {
 
-  return <div><BodyList /></div>;
+  return <div><MuscleList /></div>;
 }
 
 export default HomePage;

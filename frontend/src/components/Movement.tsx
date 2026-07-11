@@ -7,7 +7,7 @@ interface Movement {
   name: string;
   description: string;
   muscleGroups: string[];
-  equipments: string[];
+  equipment: string[];
   images : string[];
 }
 
@@ -56,8 +56,10 @@ function Movement(name : MovementName) {
                             <h5 className='card-title'>{mov.name}</h5>
                             <p className='card-text'>{mov.description}</p>
                             <h6>Targeted Muscle Groups{mov.muscleGroups.map((muscle) => (
-                                <span className='badge text-bg-primary'>{muscle}</span>
-                            ))}</h6>
+                                <span className='badge text-bg-primary me-1'>{muscle}</span>
+                            ))}
+                            </h6>
+                            <h6>Equipment: {mov.equipment.map((equipment)=>(<span className='badge text-bg-primary me-1'>{equipment}</span>))}</h6>
                         </div>
                     </div>
 

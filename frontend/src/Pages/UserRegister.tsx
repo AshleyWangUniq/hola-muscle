@@ -80,7 +80,6 @@ function UserRegister({setUser}: LoginPageProps) {
         <hr className="hr"></hr>
         <p>Already have an account? 
             <Link className="text-pink" to="/LogIn">Log in</Link>
-            {/* <a className="text-pink" href="/LogIn"> Log in</a> */}
         </p>
     </form>
     </div>

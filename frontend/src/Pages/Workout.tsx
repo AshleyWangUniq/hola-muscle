@@ -1,6 +1,6 @@
 function Workout() {
     return <>
-        <h1>Workout</h1>
+        <h1 className="text-pink">Workouts</h1>
     </>
 
 }

@@ -66,7 +66,7 @@ function NavBar({user, setUser}:NavbarProp) {
           </li>
 }
           <li>
-              {!user && <Link className="nav-link" to={"/UserRegister"}><i className="bi bi-person-circle"></i>Register</Link>}
+              {!user && <Link className="nav-link" to={"/UserRegister"}><i className="bi bi-person-circle"></i>{" "}Register</Link>}
           </li>
         </ul>
       </div>
