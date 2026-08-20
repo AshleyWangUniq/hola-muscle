@@ -1,21 +1,70 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { Types } from "mongoose";
 
-interface IMovements {
-    movement: Types.ObjectId;
-    sets?: number;
+interface ISet {
+    id: string;
     reps?: number;
+    weight?: number;
     duration?: number;
 }
 
-interface IWorkout {
+const setSchema = new Schema<ISet>(
+    {
+        id: {
+            type:String,
+            required: true,
+        },
+        reps: Number,
+        weight: Number,
+        duration: Number
+    },
+    {
+        _id: false
+    }
+)
+
+interface IMovementForWorkout {
+    id: String;
+    cardio: Boolean;
+    movement: Types.ObjectId;
+    sets: ISet[];
+    // duration?: number; 
+}
+
+const movForWorkoutSchema = new Schema<IMovementForWorkout>({
+    id: {
+        type: String,
+        required: true,
+    },
+    cardio: {
+        type: Boolean,
+        required: true,
+    },
+    movement: {
+        type: Schema.Types.ObjectId,
+        ref: "Movement",
+        required: true,
+    },
+    sets: {
+        type: [setSchema],
+        default: [],
+    }
+},
+{
+    _id: false
+}
+)
+
+export interface IWorkout extends Document {
     name: string;
-    movements: IMovements[];
+    movements: IMovementForWorkout[];
     muscleGroups: string[];
     equipment: string[]; 
     goal: string[]; // gain muscle, gain strength, loss weight
-    difficulty: string[]; // easy medium advanced allLevel
+    difficulty: string; // easy medium advanced allLevel
     duration?: number; //by minutes
+    isPublic: boolean;
+    belongsTo?: Types.ObjectId;
 }
 
 const WorkoutSchema = new mongoose.Schema<IWorkout>({
@@ -24,24 +73,11 @@ const WorkoutSchema = new mongoose.Schema<IWorkout>({
         required: true,
     },
 
-    movements: [
-        {
-            movement: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Movement",
-                required: true,
-            },
-
-            sets:{
-                Types: String,
-            },
-
-            reps: {
-                Types: String,
-            },
-        }
-    ],
-
+    movements: {
+        type: [movForWorkoutSchema],
+        required: true,
+    },
+    
     muscleGroups: {
         type: [String],
         default: [],
@@ -58,13 +94,26 @@ const WorkoutSchema = new mongoose.Schema<IWorkout>({
     },
 
     difficulty: {
-        type: [String],
+        type: String,
         required: true,
     },
 
     duration: {
         type: Number,
-    }
+    },
+
+    isPublic: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
+
+    belongsTo:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        defualt:null,
+        select: false,
+    },
 
 });
 

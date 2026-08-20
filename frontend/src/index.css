@@ -15,7 +15,11 @@
   margin-bottom: 16px;
 }
 
+.small-container{
+    margin: 10px;
+}
 .container{
+    margin: 30px auto;
     gap: 20px;
     width: 70%;
 }
@@ -44,4 +48,8 @@
 
 .text-pink {
     color: #fac5dd;
+}
+
+.text-bg-pink {
+    background-color: #fac5dd;
 }

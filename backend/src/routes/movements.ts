@@ -40,16 +40,12 @@ export function optionalAuthMiddleware(
     next: NextFunction
 ) {
     const header = req.headers.authorization;
-    console.log("optional auth pause 1");
 
     if (!header) {
-        console.log("optional auth pause no header");
         return next();
     } else {
         const token = header.split(" ")[1]!;
-        console.log("optional auth pause inside header", token);
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as MyJwtPayload;
-        console.log("decoded is", decoded);
 
         req.user = {
             id : decoded.userId,

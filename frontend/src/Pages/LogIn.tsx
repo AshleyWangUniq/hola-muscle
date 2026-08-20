@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { User } from "../types/user";
+import { useMovements } from "../contexts/MovementContext";
+import { useWorkouts } from "../contexts/WorkoutContext";
 
 interface LoginPageProps {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -10,11 +12,9 @@ function logIn({ setUser }: LoginPageProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const {refreshMovements} = useMovements();
+    const {loadWorkouts} = useWorkouts();
 
-    const userLogIn = {
-        email,
-        password,
-    };
 
     async function handleSubmission(e: React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -31,6 +31,8 @@ function logIn({ setUser }: LoginPageProps) {
         if(response.ok) {
             localStorage.setItem("token", result.token);
             setUser(result.user);
+            refreshMovements();
+            loadWorkouts();
             navigate("/");
         }
     }

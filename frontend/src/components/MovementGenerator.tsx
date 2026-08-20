@@ -1,41 +1,47 @@
 
 import { useState, type ReactEventHandler, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useMovements } from '../contexts/MovementContext';
+import type { Movement } from '../types/movement';
+import { EQUIPMENT } from '../data/Equipment';
+import { MUSCLE_GROUPS } from '../data/MuscleGroups';
 
-const muscleGroupOptions = [
-    "shoulder",
-    "Chest",
-    "Back",
-    "Legs"
-]
+// const muscleGroupOptions = [
+//     "shoulder",
+//     "Chest",
+//     "Back",
+//     "Legs"
+// ]
 
-const equipmentOptions = [
-    "cable",
-    "barbell",
-    "dumbbell",
-    "none",
-    "band"
-]
+// const equipmentOptions = [
+//     "cable",
+//     "barbell",
+//     "dumbbell",
+//     "none",
+//     "band"
+// ]
 
-interface Movement {
-  name: string;
-  description?: string;
-  musclegroups?: string[];
-  equipment?: string[];
-  images ?: string[];
-}
+// interface Movement {
+//   name: string;
+//   description?: string;
+//   muscleGroups: string[];
+//   equipment?: string[] | undefined;
+//     isPublic: boolean;
+// }
 
 function MovementGenerator() {
-    const [movements, setMovements] = useState<Movement[]>([]);
+    // const [movements, setMovements] = useState<Movement[]>([]);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
     const [equipment, setEquipment] = useState<string[]>([]);
+    const {movements, addMovement} = useMovements();
 
     async function createMovement(e : React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
         const token = localStorage.getItem("token");
         if (!token) return;
+        
 
         const res = await fetch("http://localhost:3000/api/movements", {
             method: "POST",
@@ -51,7 +57,9 @@ function MovementGenerator() {
         }
 
         const newmovement : Movement = await res.json();
-        setMovements([...movements, newmovement]);
+        addMovement(newmovement);
+
+        // setMovements([...movements, newmovement]);
         setName("");
         setDescription("");
         setMuscleGroups([]);
@@ -82,7 +90,7 @@ function MovementGenerator() {
             <div className='form-group'>
                 <label>Targeted Muscle Groups</label>
                 <div className='container-grid'>
-                {muscleGroupOptions.map((muscle) => (
+                {MUSCLE_GROUPS.map((muscle) => (
                     <div className="form-check checkbox-container" key={muscle}>
                         <input className="form-check-input" type="checkbox" id={muscle} checked={muscleGroups.includes(muscle)} onChange={(e) => {
                             if (e.target.checked) { setMuscleGroups([...muscleGroups, muscle]);
@@ -101,7 +109,7 @@ function MovementGenerator() {
             <div className='form-group'>
                 <label>Equipments</label>
                 <div className='container-grid'>
-                {equipmentOptions.map((equip) => (
+                {EQUIPMENT.map((equip) => (
                     <div className='form-check checkbox-container' key = {equip}>
                         <input className='form-check-input' type='checkbox' id={equip} checked={equipment.includes(equip)} onChange={(e) => {
                             if (e.target.checked) { setEquipment([...equipment, equip]);}

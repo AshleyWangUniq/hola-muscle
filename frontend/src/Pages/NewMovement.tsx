@@ -9,10 +9,10 @@ interface movProp {
 
 function NewMovement(user : movProp) {
   const navigate = useNavigate();
-  useEffect(()=> {
-    if (user.user) {
-    }
-  },[user]);
+  // useEffect(()=> {
+  //   if (user.user) {
+  //   }
+  // },[user]);
 
     return <>
     {!user.user && (

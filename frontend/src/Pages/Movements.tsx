@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Movement from '../components/Movement';
+import MovementsDisplay from '../components/MovementsDisplay';
 import MuscleList from '../components/MuscleList';
 
 
@@ -14,7 +14,7 @@ export default function Movements() {
     <>
     <div className='container-full'>
       <div className='row'>
-        <div className='col-8'><Movement name={name} /></div>
+        <div className='col-8'><MovementsDisplay name={name} /></div>
         <div className="col-4">
           <MuscleList />
         </div>

@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthRequest, authMiddleware, optionalAuthMiddleware } from "./routes/movements";
+import Workout from "./models/Workout";
 // import User from "./models/user";
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(route);
 
 
 //MongoDB connection, server starter
+
 if (!MONGO_URI) {
   throw new Error("No MONGO_URI found in the .env file");
 }
@@ -36,13 +38,27 @@ mongoose.connect(MONGO_URI)
 .catch((error)=>{console.error("MongoDB connection failed", error)});
 
 app.get("/", (req, res) => {
-  res.send("Backend is running");
+  res.send("Server is running");
 });
 
 interface MyJwtPayload extends JwtPayload {
   userId: string;
 }
 
+route.post("/api/workoutgeneration", authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const workout = req.body;
+    if (!req.user) return res.status(401).json({message: "No user found"});
+    const newWorkout = await Workout.create({...workout, belongsTo: req.user.id});
+
+    res.status(201).json(newWorkout);
+
+    console.dir(req.body, { depth: null });
+
+  } catch (err) {
+    res.status(500).json({message: "Failed to create workout!"});
+  }
+});
 
 route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
  try{
@@ -65,6 +81,37 @@ route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
  }
 });
 
+// route.get("/api/movements", async (req, res) => {
+//   try {
+//     const movements = await Movement.find({isPublic: true});
+//     return res.status(200).json(movements);
+//   }
+//  catch(err) {
+//   res.status(500).json({message: "Failed to create movement!"});
+// }
+// })
+
+route.get("/api/workouts", optionalAuthMiddleware, async (req: AuthRequest, res) => {
+  try{
+    let workouts;
+    if (req.user) {
+      console.log("good, you are logged user");
+      workouts = await Workout.find({
+        $or:
+        [{belongsTo: req.user.id},
+          {isPublic: true},
+        ]});
+    } else{
+      console.log("Oops, general public");
+      workouts = await Workout.find({isPublic: true});
+    }
+    return res.status(200).json(workouts);
+  } catch(err) {
+    console.log("sorry, error happend > <");
+    res.status(500).json({message: "Failed to fetch workouts"});
+  }
+});
+
 route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res) => {
   try {
     const targetMuscle = req.query.muscleGroup as string;
@@ -79,7 +126,17 @@ route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res
          movements = await Movement.find({muscleGroups: targetMuscle, belongsTo: req.user.id});
       }
     } else {
-       movements = await Movement.find({isPublic: true});
+      if (!req.user) {
+        movements = await Movement.find({isPublic: true});
+      } else {
+        movements = await Movement.find({
+          $or: [
+            {isPublic: true},
+            {belongsTo: req.user.id},
+          ]
+        });
+      }
+       
     }
     return res.status(200).json(movements);
   } catch(err) {
@@ -88,10 +145,9 @@ route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res
 });
 
 
-
-//User Creation & Fetch(Log In)
-
-
+/** 
+ * User Creation & Fetch(Log In)
+*/
  function tokenGenerator(user: IUser) {
   return jwt.sign(
       {userId: user._id},
@@ -194,7 +250,7 @@ app.get("/api/profile", async (req, res) => {
       email: user.email,
     });
   } catch (err) {
-    console.log(err);
+    console.log("error", err);
     res.status(401).json({
       message: "Oops, something wrong with token",
     });

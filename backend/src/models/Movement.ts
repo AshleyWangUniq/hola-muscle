@@ -34,17 +34,15 @@ const movementSchema = new mongoose.Schema<IMovement>({
     isPublic:{
         type: Boolean,
         required: true,
+        default: false,
     },
 
     belongsTo:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"User",
         defualt:null,
+        select: false,
     },
-
-    // images: {
-    // }
-
 });
 
 const Movement = mongoose.model<IMovement>("Movement", movementSchema);

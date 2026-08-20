@@ -9,8 +9,10 @@ import WorkoutGenerator from "./Pages/WorkoutGenerator";
 import LogIn from "./Pages/LogIn";
 import Workout from "./Pages/Workout";
 import Profile from "./Pages/Profile";
+import LogInReminder from "./Pages/LogInReminder";
 import { useState } from "react";
 import type { User } from "./types/user";
+import WorkoutDetail from "./Pages/WorkoutDetail";
 
 
 function App() {
@@ -28,7 +30,8 @@ function App() {
     <Route path="/Workout" element={<Workout />} />
     <Route path="/Profile" element={<Profile />} />
     <Route path="/WorkoutGenerator" element={<WorkoutGenerator />} />
-
+    <Route path="/LogInReminder" element={<LogInReminder />} />
+    <Route path="/WorkoutDetail" element={<WorkoutDetail />} />
   </Routes>
   </div>
 </div>;
