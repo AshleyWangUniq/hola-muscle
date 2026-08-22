@@ -47,6 +47,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
         }
     }
 
+
     function addWorkout(workout: Workout) {
         setWorkouts((prev)=>[...prev, workout]);
     }

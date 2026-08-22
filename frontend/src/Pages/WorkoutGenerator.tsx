@@ -7,9 +7,7 @@ import { useMovements } from "../contexts/MovementContext";
 import Select from "react-select";
 import type { Movement } from "../types/movement";
 import { useNavigate } from "react-router-dom";
-import NewMovement from "./NewMovement";
 import MovementGenerator from "../components/MovementGenerator";
-
 /*
 workout 
 */
@@ -49,12 +47,33 @@ interface workout {
 function WorkoutGenerator() {
     const [workout, setWorkout] = useState<workout>({name:"My Template", movements: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
     const [movements, setMovements] = useState<MovementForWorkot[]>([]);  
-    const {movements: movementsForOptions} = useMovements();   
+    const {movements: movementsForOptions} = useMovements(); 
+    const [confirmName, setConfirmName] = useState(false);
     const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov._id, label: mov.name}));
 
     // const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov.id, label: mov.name, movement: mov}));
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
+
+    function reset() {
+        setWorkout({name:"My Template", movements: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
+        setConfirmName(false);
+    }
+
+    function cancel() {
+        setConfirmName(false);
+    }
+
+    function confirmed(e : React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        if (workout.name === "My Template") {
+            setConfirmName(true);
+        } else {
+            console.log("unmatch");
+            geneartion();
+        }
+    }
 
     useEffect(()=> {
 
@@ -62,13 +81,15 @@ function WorkoutGenerator() {
             navigate("/LogInReminder");
         }
     });
-    async function geneartion(e : React.SyntheticEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function geneartion() {
+        // e.preventDefault();
 
         if (!token) {
             alert("please log in first");
             return;
         }
+
+
 
         const finalValue: workout = {...workout, movements: movements};
         console.log("finalValue:", finalValue);
@@ -85,6 +106,7 @@ function WorkoutGenerator() {
         if (!res.ok) {
             throw new Error("failed to create workout");
         } else {
+            reset();          
             console.log("sucessfully created your workout.");
         }
     } 
@@ -114,16 +136,6 @@ function WorkoutGenerator() {
     function addMovement() {
         setMovements(prev=>[...prev, {id: crypto.randomUUID(), movement: "", sets: [], cardio: false}]);
     }
-
-
-
-    // function changeFormat(movid: string, checked: boolean) {
-    //     setMovements(movements.map((mov) => mov.id === movid ? {...mov, cardio: checked} : mov));
-    // }
-
-    // function numberReset(movid: string) {
-    //     setMovements(movements.map((mov) => mov.id === movid ? {...mov, sets: mov.sets.map((s) => {...s, weight: null, })} : mov));
-    // }
 
     function numberReset(movid: string, checked: boolean) {
         setMovements(prev => prev.map((mov) => mov.id === movid ? {...mov, cardio: checked, sets: mov.sets.map((s) => ({...s, reps: undefined, weight: undefined, duration: undefined })),} : mov));
@@ -164,11 +176,6 @@ function WorkoutGenerator() {
     function deleteGoal(goal: string) {
         setWorkout(prev => ({...prev, goal: workout.goal.filter(e=>e !==goal)}));
     }
-
-    // function addMuscle(muscle: string) {
-    //     setWorkout({...workout, muscleGroups:[...workout.muscleGroups, muscle]});
-    //     // console.log(workout);
-    // }
     
     function addMuscle(muscle: string) {
         setWorkout(prev => ({...prev, muscleGroups:[...workout.muscleGroups, muscle]}));
@@ -179,7 +186,7 @@ function WorkoutGenerator() {
 
     return <>
     {/* <MovementSelector onSelect={addMovement} /> */}
-    <form onSubmit={geneartion}>
+    <form onSubmit={confirmed}>
         <input className="form-control-lg " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
     <div>
     <h4>Targeted Muscles</h4>
@@ -286,8 +293,25 @@ function WorkoutGenerator() {
 </div>
 ))}
 </div>
-<button type="submit" >Create</button>
+<button type="submit" className="btn btn-lg btn-pink">Create</button>
 </form>
+{confirmName && 
+        (<div className="modal d-block" id="renameReminder" tabIndex={-1} aria-hidden="true">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="text-pink">Please Confirm Your Workout Name</h5>
+                    </div>
+                    <div className="modal-body">
+                        <input className="form-control-lg " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-pink" onClick={cancel}>Cancel</button>
+                        <button type="button" className="btn btn-pink" onClick={geneartion}>Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div> )}
 <div
     className="modal"
     id="NewMovement"

@@ -10,7 +10,7 @@ function MuscleList() {
     return <>
     <h1>Muscles</h1>
     <ul className="list-group">
-        <button type="button" id={"all"} className="list-group-item" onClick={()=>toDetail("all")}>All</button>
+        <button type="button" id={"all"} className="list-group-item" onClick={()=>toDetail("All")}>All</button>
         {MUSCLE_GROUPS.map((item) => 
             <button type="button" id={item} className="list-group-item" onClick={()=>toDetail(item)}>{item}</button>
     )}

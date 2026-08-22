@@ -55,7 +55,9 @@ function NavBar({user, setUser}:NavbarProp) {
       <div className="collapse navbar-collapse">
         <ul className="navbar-nav ms-auto gap-3">
           <li className="nav-item">
-            <Link className="nav-link" to="/NewMovement" state={user}>New Movement</Link>
+            {/* <button type="button" id={"all"} className="list-group-item" onClick={()=>toDetail("all")}>All</button> */}
+            <Link className="nav-link" to="Movements" state={{name:"All"}}>Movements</Link>
+            {/* <Link className="nav-link" to="/NewMovement" state={user}>New Movement</Link> */}
           </li>
           <li className="nav-item">
             <Link className="nav-link" to={"/Workout"}>Workout</Link>

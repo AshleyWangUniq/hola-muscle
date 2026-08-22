@@ -1,10 +1,12 @@
 import { useLocation } from "react-router-dom";
 import type { Workout } from "../types/workout";
+import { useMovements } from "../contexts/MovementContext";
 
 export default function WorkoutDetail() {
     const location = useLocation();
+    const workout = location.state.workout as Workout;
 
-    const workout = location.state.workout as Workout
+    const {movements} = useMovements();
     
     return (<>
     <div className="col-8">

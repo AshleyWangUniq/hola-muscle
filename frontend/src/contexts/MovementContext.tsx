@@ -20,6 +20,8 @@ interface MovementContextType {
     loading: boolean;
     refreshMovements: () => Promise<void>;
     addMovement: (movement : Movement) => void;
+    deleteMovement: (id : String) => void;
+    findMovement: (id : String) => Movement | undefined;
 }
 
 const MovementContext = createContext<MovementContextType | undefined> (undefined);
@@ -63,10 +65,51 @@ export function MovementProvider({children} : {children: ReactNode}) {
         } finally {
             setLoading(false);
         }
-    } 
+    }
 
     function addMovement(movement : Movement) {
         setMovements((prev) => [...prev, movement]);
+    }
+
+    function movementInUse(id: String) {
+
+    }
+
+    async function deleteMovement(id : String) {
+        try {
+            setLoading(true);
+
+            const token = localStorage.getItem("token");
+            const headers : HeadersInit = {
+                "Content-Type": "application/json",
+            }
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            } else {
+                throw new Error("No User Found");
+            }
+
+            const response = await fetch(`http://localhost:3000/api/movements/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization : `Bearer ${token}`
+                    } 
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to delete Movement");
+            }
+        } catch(err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function findMovement(id : String) {
+        return undefined;
     }
 
     useEffect(() => {refreshMovements();}, []);
@@ -77,6 +120,8 @@ export function MovementProvider({children} : {children: ReactNode}) {
             loading,
             refreshMovements,
             addMovement,
+            deleteMovement,
+            findMovement
         }} >{children}</MovementContext.Provider>
     )
 }

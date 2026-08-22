@@ -81,6 +81,69 @@ route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
  }
 });
 
+route.delete("/api/movements/:id", authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    if (!req.user) {
+      throw new Error("Not logged user");
+    }
+    const movid = req.params.id;
+    if (typeof movid !== "string") {
+    return res.status(400).json({
+        message: "Invalid movement ID"
+    });
+}
+    // console.log(mongoose.Types.ObjectId.isValid(movid));
+    const forceDelete = req.query.force === "true";
+    //check if movement is used by any workout
+    const isUsed = await Workout.exists({"movements.movement" : movid});
+    console.log("is used?:", isUsed);
+
+    if (isUsed && !forceDelete) {
+      console.log("inside workout finding section");
+      const workoutnames = await Workout.find({
+        belongsTo: req.user.id,
+        "movements.movement" : movid
+      }).select("name");
+      console.log("afer workoutnames", workoutnames);
+      return res.status(409).json({
+        message: "The movement is used in other workouts, do you still want to delete it?",
+        requiresConfirmation: true,
+        workouts: workoutnames
+      })
+
+      console.log("409 didn't go well");
+    }
+
+    if (isUsed && forceDelete) {
+    // delete movement from all workouts 
+      console.log("force delete section reached");
+      Workout.updateMany({
+        belongsTo: req.user.id,
+        "movements.movement" : movid
+      },
+    {
+      $pull: {
+        movements: {
+          movement : req.params.id
+        }
+      }
+    })
+    }
+
+    //delete the movement
+    const deletion = await Movement.findOneAndDelete({
+      _id: req.params.id,
+      belongsTo: req.user.id
+    })
+    
+    if (!deletion) return res.status(200).json({message: "No Movement Found"});
+
+    return res.status(200).json({message:"Movement Deleted"});
+
+  } catch(err) {
+    res.status(500).json({message: "Failed to delete movement >_<", errormessage: err});
+  }
+})
 // route.get("/api/movements", async (req, res) => {
 //   try {
 //     const movements = await Movement.find({isPublic: true});
@@ -95,7 +158,7 @@ route.get("/api/workouts", optionalAuthMiddleware, async (req: AuthRequest, res)
   try{
     let workouts;
     if (req.user) {
-      console.log("good, you are logged user");
+      console.log("good, you are a logged user");
       workouts = await Workout.find({
         $or:
         [{belongsTo: req.user.id},

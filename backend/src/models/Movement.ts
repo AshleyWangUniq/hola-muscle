@@ -34,7 +34,7 @@ const movementSchema = new mongoose.Schema<IMovement>({
     isPublic:{
         type: Boolean,
         required: true,
-        default: false,
+        // default: false,
     },
 
     belongsTo:{
