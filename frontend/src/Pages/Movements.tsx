@@ -12,13 +12,11 @@ export default function Movements() {
 
   return (
     <>
-    <div className='container-full'>
-      <div className='row'>
-        <div className='col-8'><MovementsDisplay name={name} /></div>
-        <div className="col-4">
+    <div className='container-grid-movements'>
+        <div className='scroll-component'><MovementsDisplay name={name} /></div>
+        <div className="fixed-conponent">
           <MuscleList />
         </div>
-      </div>
     </div>
     </>
   );

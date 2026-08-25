@@ -7,7 +7,7 @@ import NewMovement from "./Pages/NewMovement";
 import UserRegister from "./Pages/UserRegister";
 import WorkoutGenerator from "./Pages/WorkoutGenerator";
 import LogIn from "./Pages/LogIn";
-import Workout from "./Pages/Workout";
+import WorkoutPage from "./Pages/WorkoutPage";
 import Profile from "./Pages/Profile";
 import LogInReminder from "./Pages/LogInReminder";
 import { useState } from "react";
@@ -19,7 +19,7 @@ function App() {
 
   const [user, setUser] = useState<User | null>(null);
 
-  return <div><NavBar user={user} setUser={setUser}/>
+  return <div><NavBar />
   <div className="container">
   <Routes>
     <Route path="/" element = {<HomePage/>} />
@@ -27,7 +27,7 @@ function App() {
     <Route path="/NewMovement" element={<NewMovement user={user}/>} />
     <Route path="/UserRegister" element={<UserRegister setUser={setUser}/>} />
     <Route path="/LogIn" element={<LogIn setUser={setUser}/>} />
-    <Route path="/Workout" element={<Workout />} />
+    <Route path="/WorkoutPage" element={<WorkoutPage />} />
     <Route path="/Profile" element={<Profile />} />
     <Route path="/WorkoutGenerator" element={<WorkoutGenerator />} />
     <Route path="/LogInReminder" element={<LogInReminder />} />

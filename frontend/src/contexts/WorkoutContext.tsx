@@ -1,10 +1,12 @@
 import {Children, createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import type {Workout} from "../types/workout";
+import { useUser } from "./UserContext";
 
 interface WorkoutContextType {
     workouts: Workout[];
     loading: boolean;
     loadWorkouts: () => Promise<void>;
+    deleteWorkout: (id : string) => void;
     addWorkout: (workout : Workout) => void;
 }
 
@@ -13,7 +15,39 @@ const WorkoutContext = createContext<WorkoutContextType | undefined> (undefined)
 export function WorkoutProvider({children}: {children: ReactNode}) {
     const[workouts, setWorkouts] = useState<Workout[]>([]);
     const[loading, setLoading] = useState(false);
+    const {user} = useUser();
 
+    useEffect(()=> {
+        void loadWorkouts();
+    },[user]);
+
+
+        async function deleteWorkout(id : string) {
+        try {
+            setLoading(true);
+
+            const token = localStorage.getItem("token");
+            const res = await fetch(`http://localhost:3000/api/workout/${id}`, {
+                method: "DELETE",
+                headers : {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                const data = await res.json();
+
+            if (res.ok) {
+                console.log(data.message);
+                setWorkouts(prev=>prev.filter(workout => workout._id !== id)
+)
+            } else {
+                throw new Error(data.message);
+            }
+        } catch(err){
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    }
     async function loadWorkouts() {
         
         try {
@@ -34,7 +68,6 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
                     headers,
                 }
             );
-            console.log(response);
             if (!response.ok) {
                 throw new Error("failed fetching workouts, sorrrry > <");
             }
@@ -54,7 +87,13 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
 
     useEffect(()=> {loadWorkouts();},[]);
 
-    return(<WorkoutContext.Provider value={{workouts, loading, loadWorkouts, addWorkout}}>{children}</WorkoutContext.Provider>)
+    return(<WorkoutContext.Provider value={
+        {workouts, 
+            loading, 
+            loadWorkouts, 
+            addWorkout,
+            deleteWorkout
+        }}>{children}</WorkoutContext.Provider>)
 }
 
 export function useWorkouts() {

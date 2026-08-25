@@ -81,6 +81,24 @@ route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
  }
 });
 
+route.delete("/api/workout/:id", authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    if (!req.user) {
+      throw new Error("No user found");
+    }
+    const deletion = await Workout.findOneAndDelete({
+      _id: req.params.id,
+      belongsTo: req.user.id
+    })
+
+    if (!deletion) return res.status(200).json({message: "No Movement Found"});
+
+    return res.status(200).json({message:"Movement Deleted"});
+  } catch(err) {
+    return res.status(500).json(err);
+  }
+})
+
 route.delete("/api/movements/:id", authMiddleware, async (req: AuthRequest, res) => {
   try {
     if (!req.user) {
@@ -92,31 +110,24 @@ route.delete("/api/movements/:id", authMiddleware, async (req: AuthRequest, res)
         message: "Invalid movement ID"
     });
 }
-    // console.log(mongoose.Types.ObjectId.isValid(movid));
     const forceDelete = req.query.force === "true";
     //check if movement is used by any workout
     const isUsed = await Workout.exists({"movements.movement" : movid});
-    console.log("is used?:", isUsed);
 
     if (isUsed && !forceDelete) {
-      console.log("inside workout finding section");
       const workoutnames = await Workout.find({
         belongsTo: req.user.id,
         "movements.movement" : movid
       }).select("name");
-      console.log("afer workoutnames", workoutnames);
       return res.status(409).json({
         message: "The movement is used in other workouts, do you still want to delete it?",
         requiresConfirmation: true,
         workouts: workoutnames
       })
-
-      console.log("409 didn't go well");
     }
 
     if (isUsed && forceDelete) {
     // delete movement from all workouts 
-      console.log("force delete section reached");
       Workout.updateMany({
         belongsTo: req.user.id,
         "movements.movement" : movid
@@ -144,36 +155,26 @@ route.delete("/api/movements/:id", authMiddleware, async (req: AuthRequest, res)
     res.status(500).json({message: "Failed to delete movement >_<", errormessage: err});
   }
 })
-// route.get("/api/movements", async (req, res) => {
-//   try {
-//     const movements = await Movement.find({isPublic: true});
-//     return res.status(200).json(movements);
-//   }
-//  catch(err) {
-//   res.status(500).json({message: "Failed to create movement!"});
-// }
-// })
 
 route.get("/api/workouts", optionalAuthMiddleware, async (req: AuthRequest, res) => {
   try{
     let workouts;
     if (req.user) {
-      console.log("good, you are a logged user");
       workouts = await Workout.find({
         $or:
         [{belongsTo: req.user.id},
           {isPublic: true},
         ]});
     } else{
-      console.log("Oops, general public");
       workouts = await Workout.find({isPublic: true});
     }
     return res.status(200).json(workouts);
   } catch(err) {
-    console.log("sorry, error happend > <");
     res.status(500).json({message: "Failed to fetch workouts"});
   }
 });
+
+
 
 route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res) => {
   try {
@@ -259,6 +260,9 @@ app.post("/api/LogIn", async (req,res) => {
   try {
     const {email, password} = req.body;
     const user = await User.findOne({email}).select("+password");
+    if (!user) {
+      console.log("User not found");
+    }
 
     if (!user) {return res.status(404).json({message: "User not found"});}
     const isMatch = await bcrypt.compare(password, user.password);
@@ -313,7 +317,6 @@ app.get("/api/profile", async (req, res) => {
       email: user.email,
     });
   } catch (err) {
-    console.log("error", err);
     res.status(401).json({
       message: "Oops, something wrong with token",
     });

@@ -1,23 +1,10 @@
-import {useState, useEffect } from 'react';
-import {Navigate, useNavigate } from 'react-router-dom';
-import MovementGenerator from '../components/MovementGenerator';
-import type { User } from '../types/user';
-
-interface movProp {
-  user: User | null;
+interface praps {
+    setDisplay : React.Dispatch<React.SetStateAction<string | null>>
 }
 
-function NewMovement(user : movProp) {
-  const navigate = useNavigate();
-  // useEffect(()=> {
-  //   if (user.user) {
-  //   }
-  // },[user]);
-
+function LogInReminderModal(prap : praps) {
     return <>
-
-    {!user.user && (
-        <div className="modal d-block" tabIndex={-1}>
+    <div className="modal d-block" tabIndex={-1}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -31,7 +18,7 @@ function NewMovement(user : movProp) {
               <div className="modal-footer">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => {navigate("/");}}
+                  onClick={() => {prap.setDisplay(null);}}
                 >
                   Cancel
                 </button>
@@ -39,7 +26,7 @@ function NewMovement(user : movProp) {
                 <button
                   className="btn btn-primary"
                   onClick={() => {
-                    navigate("/login");
+                    prap.setDisplay("LogIn");
                   }}
                 >
                   Log In
@@ -47,12 +34,8 @@ function NewMovement(user : movProp) {
               </div>
             </div>
           </div>
-        </div>
-      )}
-      {user.user && <div><MovementGenerator /></div>}
-    
-    {/* {!isLoged && <Navigate to="/Login" />} */}
-    </>;
+        </div>                
+    </>
 }
 
-export default NewMovement;
+export default LogInReminderModal;

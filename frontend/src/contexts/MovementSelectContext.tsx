@@ -20,7 +20,7 @@ function MovementSelector({ onSelect }: MovementSelectorProps) {
   const { movements } = useMovements();
 
   const movementOptions: MovementOption[] = movements.map((movement) => ({
-    value: movement.id,
+    value: movement._id,
     label: movement.name,
     movement,
   }));

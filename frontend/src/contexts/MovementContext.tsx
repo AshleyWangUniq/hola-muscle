@@ -12,6 +12,7 @@
  // 
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import type { Movement } from "../types/movement";
+import { useUser } from "./UserContext";
 
 
 
@@ -20,8 +21,8 @@ interface MovementContextType {
     loading: boolean;
     refreshMovements: () => Promise<void>;
     addMovement: (movement : Movement) => void;
-    deleteMovement: (id : String) => void;
-    findMovement: (id : String) => Movement | undefined;
+    deleteMovement: (id : string) => Promise<void>;
+    findMovementById: (id : string) => Movement | undefined;
 }
 
 const MovementContext = createContext<MovementContextType | undefined> (undefined);
@@ -30,6 +31,19 @@ const MovementContext = createContext<MovementContextType | undefined> (undefine
 export function MovementProvider({children} : {children: ReactNode}) {
     const [movements, setMovements] = useState<Movement[]>([]);
     const [loading, setLoading] = useState(false);
+    const {user} = useUser();
+
+    useEffect(()=>{
+        void refreshMovements();
+    },[user]);
+
+    function findMovementById(id : string) {
+        console.log(id);
+        console.log(movements);
+        const movement = movements.find(mov => mov._id === id);
+        console.log(movement?.name);
+        return movement;
+    }
 
     async function refreshMovements() {
         try {
@@ -71,9 +85,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
         setMovements((prev) => [...prev, movement]);
     }
 
-    function movementInUse(id: String) {
-
-    }
 
     async function deleteMovement(id : String) {
         try {
@@ -108,10 +119,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
         }
     }
 
-    function findMovement(id : String) {
-        return undefined;
-    }
-
     useEffect(() => {refreshMovements();}, []);
 
     return (
@@ -121,7 +128,7 @@ export function MovementProvider({children} : {children: ReactNode}) {
             refreshMovements,
             addMovement,
             deleteMovement,
-            findMovement
+            findMovementById
         }} >{children}</MovementContext.Provider>
     )
 }

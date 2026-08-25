@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import type { User } from "../types/user";
+
+
 interface LoginPageProps {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 function UserRegister({setUser}: LoginPageProps) {
+    const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
-    // if (token) {alert(`Hi ${token.}`)}
+    if (token) {
+        navigate("/Profile");
+    }
 
-    const navigate = useNavigate();
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMovements } from '../contexts/MovementContext';
 import type { Movement } from '../types/movement';
+import { Link } from 'react-router-dom';
 
 
 interface bufferDeleting {
@@ -13,24 +14,21 @@ interface MovementName {
     name : string;
 }
 
-interface WorkoutName {
-    name: string;
-}
 
 function MovementsDisplay(name : MovementName) {
     const {movements} = useMovements();
     const muscle = name.name;
     const [deleteBuffer, setdeleteBuffer] = useState<bufferDeleting>({working: false, warningDisplay: false, movementId: ""});
-    const [deleteWarning, setDeleteWarning] = useState(false);
-    const [affectedWorkouts, setAffectedWorkouts] = useState<WorkoutName[] | undefined>();
-    // const [displayMovements, setDisplayMovements] = useState<Movement[]>();
+
+    useEffect(()=>{
+
+    },[]);
 
     const displayMovements = muscle === "All" ? movements : movements.filter((mov) => mov.muscleGroups.includes(muscle));
 
     function resetBuffer() {
         console.log("restting");
         setdeleteBuffer({working: false, warningDisplay: false, movementId: ""});
-        setAffectedWorkouts(undefined);
     }
 
     function takeBuffer(id:string) {
@@ -83,7 +81,6 @@ function MovementsDisplay(name : MovementName) {
                     console.log("Movement In Use");
                     takeBuffer(id);
                     // setDeleteWarning(true);
-                    setAffectedWorkouts(data.workouts);
                 } 
             }
         } catch(err) {
@@ -94,19 +91,25 @@ function MovementsDisplay(name : MovementName) {
  
     return (
         <>
+        
         <div>
             <h1 className='text-pink'>{name.name}</h1>
+            {displayMovements.length === 0 && <p className='text-pink'>No movement, <Link className="text-pink" to="/NewMovement">Generate here</Link></p>}
+            
             <div>
                 {displayMovements.map((mov)=>(
                     // (mov.muscleGroups.includes(muscle)) && 
                     <div className='card small-container' key={mov.name}>
                         <div className='card-body'> 
+                            <div className='card-header d-flex justify-content-between'>
                             <h5 className='card-title text-pink'>{mov.name}</h5>
+                            {/* </div> */}
                             {!mov.isPublic && 
-                            <div>
-                                <button type="button" className='btn btn-sm btn-pink' onClick={()=>editMovement(mov._id)}>Edit</button>
+                            <div className='btn-group'>
+                                <button type="button" className='btn btn-sm me-1 btn-pink' onClick={()=>editMovement(mov._id)}>Edit</button>
                                 <button type="button" className='btn btn-sm btn-pink' onClick={()=>deleteMovement(mov._id)}>Delete</button>
                             </div>}
+                            </div>
                             <p className='card-text'>{mov.description}</p>
                             <div className="card-footer">
                             <h6>Targmeted Muscle Groups: {mov.muscleGroups.map((muscle) => (
@@ -120,29 +123,25 @@ function MovementsDisplay(name : MovementName) {
                 ))}
             </div>
         </div>
-        {/* {deleteBuffer.warningDisplay && <div>
-            <p>Force Delete</p>
-            {affectedWorkouts?.map((wk)=><p>{wk.name}</p>)}
-            <button type="button" onClick={()=>forceDeletion()}>Force Delete</button>
-            <button type="button" onClick={()=>resetBuffer()}>Cancel</button>
-        </div>} */}
+
         {deleteBuffer.warningDisplay && 
             <div className="modal d-block" tabIndex={-1}>
                 <div className="modal-dialog">
                     <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Movement in use!</h5>
+                        <h5 className="modal-title text-pink">Movement in Use</h5>
                         {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close"> */}
                         {/* <span aria-hidden="true">&times;</span> */}
                         {/* </button> */}
                     </div>
                     <div className="modal-body">
-                        {/* {affectedWorkouts?.map((wk)=><p key="wk._id">{wk.name}</p>)} */}
-                        <p>This movement is used in your workouts, delete movement will also remove it from your workouts. Do you still want to delete it?</p>
+                        <p>This movement is used in your workouts. Deleting it will also remove it from those workouts. Are you sure you want to continue?</p>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn-pink" onClick={()=>forceDeletion()}>Force Delete</button>
-                        <button type="button" className="btn-pink" onClick={()=>resetBuffer()}>Cancel</button>
+                        <div className='btn-group'>
+                        <button type="button" className="btn btn-pink me-1" onClick={()=>forceDeletion()}>Force Delete</button>
+                        <button type="button" className="btn btn-pink" onClick={()=>resetBuffer()}>Cancel</button>
+                        </div>
                     </div>
                     </div>
                 </div>

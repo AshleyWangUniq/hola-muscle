@@ -8,7 +8,9 @@ function MuscleList() {
     }
 
     return <>
-    <h1>Muscles</h1>
+    <div className="d-flex justify-content-center">
+    <h1 className="text-pink">Muscles</h1>
+    </div>
     <ul className="list-group">
         <button type="button" id={"all"} className="list-group-item" onClick={()=>toDetail("All")}>All</button>
         {MUSCLE_GROUPS.map((item) => 

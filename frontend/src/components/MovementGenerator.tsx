@@ -67,11 +67,13 @@ function MovementGenerator() {
     }
     return <>
       <div className='container'>
-                <h1 className='text-pink'>New Movement</h1>
-                <hr className='hr' />
+        <div className='d-flex justify-content-center'>
+            <h1 className='text-pink'>New Movement</h1>
+        </div>
+        <hr className='hr' />
         <form onSubmit={createMovement}>
             <div className='form-group'>
-                <label>Name</label>
+                <label className='text-pink'>Name</label>
                 <input className="form-control" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -79,7 +81,7 @@ function MovementGenerator() {
             </div>
 
             <div className='form-group'>
-                <label>Description</label>
+                <label className='text-pink'>Description</label>
                 <textarea 
                 className='form-control'
                 value = {description}
@@ -88,7 +90,7 @@ function MovementGenerator() {
             </div>
 
             <div className='form-group'>
-                <label>Targeted Muscle Groups</label>
+                <label className='text-pink'>Targeted Muscle Groups</label>
                 <div className='container-grid'>
                 {MUSCLE_GROUPS.map((muscle) => (
                     <div className="form-check checkbox-container" key={muscle}>
@@ -107,7 +109,7 @@ function MovementGenerator() {
             </div>
 
             <div className='form-group'>
-                <label>Equipments</label>
+                <label className='text-pink'>Equipment</label>
                 <div className='container-grid'>
                 {EQUIPMENT.map((equip) => (
                     <div className='form-check checkbox-container' key = {equip}>
@@ -120,17 +122,13 @@ function MovementGenerator() {
                 ))}
                 </div>
             </div>
+            <div className='d-flex justify-content-center'>
+                <button type = 'submit' className='btn btn-pink'>Submit</button>
+            </div>
 
-            <button type = 'submit' className='btn btn-pink'>Submit</button>
+            
             {/* <button type = 'button' onClick={handleSubmission}>Submit</button> */}
         </form>
-        <hr className='hr' />
-        <div>
-            <h3 className='text-pink'>My Movements</h3>
-            {movements.map((movement) => (
-                <div key={movement.name}>{movement.name} + {movement.description}</div>
-            ))}
-        </div> 
     </div></>;
 }
 

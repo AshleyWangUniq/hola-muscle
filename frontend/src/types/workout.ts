@@ -12,8 +12,8 @@ interface MovementForWorkout {
     sets: set[];
 }
 
-
 export interface Workout {
+    _id: string;
     name: string;
     movements: MovementForWorkout[];
     muscleGroups: string[];

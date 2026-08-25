@@ -1,40 +1,48 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { User } from "../types/user";
 import { useMovements } from "../contexts/MovementContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
+import { useUser } from "../contexts/UserContext";
 
 interface LoginPageProps {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 function logIn({ setUser }: LoginPageProps) {
+
+    const {user, logIn} = useUser();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const {refreshMovements} = useMovements();
-    const {loadWorkouts} = useWorkouts();
 
+    useEffect(() => {
+        if (user) {
+            navigate(-1);
+        }
+    },[user]);
 
     async function handleSubmission(e: React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const response = await fetch("http://localhost:3000/api/LogIn", {
-            method:"POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({email, password}),
-        })
+        logIn({email, password});
+        
+        // const response = await fetch("http://localhost:3000/api/LogIn", {
+        //     method:"POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({email, password}),
+        // })
 
-        const result = await response.json();
-        if(response.ok) {
-            localStorage.setItem("token", result.token);
-            setUser(result.user);
-            refreshMovements();
-            loadWorkouts();
-            navigate("/");
-        }
+        // const result = await response.json();
+        // if(response.ok) {
+        //     localStorage.setItem("token", result.token);
+        //     setUser(result.user);
+        //     refreshMovements();
+        //     loadWorkouts();
+        //     navigate("/");
+        // }
     }
 
     return <>

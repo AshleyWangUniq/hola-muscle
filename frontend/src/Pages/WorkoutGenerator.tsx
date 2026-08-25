@@ -187,10 +187,10 @@ function WorkoutGenerator() {
     return <>
     {/* <MovementSelector onSelect={addMovement} /> */}
     <form onSubmit={confirmed}>
-        <input className="form-control-lg " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
+    <input className="form-control-lg mb-5 " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
     <div>
-    <h4>Targeted Muscles</h4>
-    <div className="form-check container-grid">
+    <h5 className="text-pink">Targeted Muscles</h5>
+    <div className="form-check container-three-cols">
         {MUSCLE_GROUPS.map((muscle)=> (
             <div key={muscle} className="form-check">
                 <input id={muscle} className="form-check-input " type="checkbox" checked={workout.muscleGroups.includes(muscle)} onChange={(e)=> {
@@ -205,8 +205,9 @@ function WorkoutGenerator() {
         ))} 
     </div>
     </div>
+    <hr className='hr' />
     <div>
-        <h4>Goals</h4>
+        <h5 className="text-pink">Goals</h5>
         <div className="form-check container-grid">
             {GOALS.map((goal) => (
                 <div key={goal}>
@@ -222,9 +223,10 @@ function WorkoutGenerator() {
             ))}
         </div>
     </div>
+    <hr className='hr' />
     <div>
-        <h4>Difficulty</h4>
-        <div className="form-check container-grid">
+        <h5 className="text-pink">Difficulty</h5>
+        <div className="form-check container-three-cols">
         {DIFFICULTY.map((diff) => (
             <div key={diff}>
                 <input className="form-check-input" type="radio" name="difficulty" id={diff} checked={workout.difficulty === diff} onChange={()=>setDifficulty(diff)}></input>
@@ -233,9 +235,10 @@ function WorkoutGenerator() {
         )
         )} </div>
     </div>
+    <hr className='hr' />
     <div>
-        <h4>Equipment</h4>
-        <div className="form-check container-grid">
+        <h5 className="text-pink">Equipment</h5>
+        <div className="form-check container-three-cols">
             {EQUIPMENT.map((equip)=> (
                 <div key={equip}>
                     <input id={equip} className="form-check-input " type="checkbox" checked={workout.equipment.includes(equip)} onChange={(e)=> {
@@ -250,53 +253,70 @@ function WorkoutGenerator() {
             ))} 
         </div>
     </div>
-    <div>
-    <button className="button"  type="button" onClick={addMovement}>Add Movement</button>
-    <button className="button" type="button" data-bs-toggle="modal" data-bs-target="#NewMovement">Didn't Find Your Movement, Create New</button>
-    
-
-    {movements.map((movement)=> (<div className="card"  key={movement.id}>
+    <hr className='hr' />
+    {movements.map((movement)=> (<div className="card mb-3"  key={movement.id}>
     <div className="card-body">
-        {/* <h6>{movement.name}</h6> */}
-            <button className="button"  type="button" onClick={()=>deleteMovement(movement.id)}>Delete Movement</button>
-
+        <button className="btn btn-pink btn-sm float-end"  type="button" onClick={()=>deleteMovement(movement.id)}>Delete Movement</button>
+        <div className="d-flex justify-content-between">
+            <div className="col-9 me-3">
         <Select options={movementsOptions} onChange={(option) => {if (option) setMovementName(option, movement.id);}}/>
-        {/* <input type="text" className="form-control-lg" value={movement.name} onChange={(e)=>{setMovName(e.target.value, movement.id)}}></input> */}
-        <button className="btn btn-pink" type="button" onClick={() => addSet(movement.id)}>Add Set</button>
-        <div className="form-check form-switch">
+            </div>
+        <div className="form-check form-switch col-3">
             <input className="form-check-input" type="checkbox" role="role" id={movement.id} checked={movement.cardio} onChange={(e) => numberReset(movement.id, e.target.checked)}></input>
             <label className="form-check-label" htmlFor={movement.id}>Cardio?</label>
         </div>
-        {movement.sets.map((set) => (
-            <div key={set.id}>
+            </div>
+        {/* <input type="text" className="form-control-lg" value={movement.name} onChange={(e)=>{setMovName(e.target.value, movement.id)}}></input> */}
+        <button className="btn btn-pink btn-sm mt-2" type="button" onClick={() => addSet(movement.id)}>Add Set</button>
+        {movement.sets.map((set, index) => (
+            <div className="row">
+                <div className="col-1  d-flex justify-content-center align-items-center">set {++index}</div>
+            <div className="col-11 mb-3" key={set.id}>
             {movement.cardio ? (
-            <div>
-                <label>Duration</label>
-                <input type="number" value={set.duration ?? ""} onChange={(e) => changeSetDuration(movement.id, set.id, e.target.value)} ></input>
-            </div> ) :
-            (<div>
-                <div>
-                <label>Weight</label>
-                <input type="number" value={set.weight ?? ""} onChange={(e) => changeSetWeight(movement.id, set.id, e.target.value)}></input>
+            <div className="row">
+                <div className="col-10">
+                    <label className="me-1">Duration in minute:</label>
+                    <input type="number" min="0" value={set.duration ?? ""} onChange={(e) => changeSetDuration(movement.id, set.id, e.target.value)} ></input>
+                </div> 
+                <div className="col-2">
+                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(movement.id, set.id)}>Delete</button>
                 </div>
-                <div>
-                <label>Reps</label>
-                <input type="number" value={set.reps ?? ""} onChange={(e) => changeSetReps(movement.id, set.id, e.target.value)}></input>
+            </div>
+            ) :
+            (<div className="row">
+                <div className="col-6">
+                <label className="me-1">Weight in kg:</label>
+                <input type="number" min="0" value={set.weight ?? ""} onChange={(e) => changeSetWeight(movement.id, set.id, e.target.value)}></input>
+                </div>
+                <div className="col-5">
+                <label className="me-1">Reps: </label>
+                <input type="number" min="0" value={set.reps ?? ""} onChange={(e) => changeSetReps(movement.id, set.id, e.target.value)}></input>
+                </div>
+                <div className="col-1">
+                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(movement.id, set.id)}>Delete</button>
                 </div>
             </div>
             )}
-            <button className="btn btn-pink btn-sm"  type="button" onClick={() => deleteSet(movement.id, set.id)}>Delete</button>
+            
+            </div>
             <hr className='hr' />
             </div>
         ))}
     </div>
 </div>
 ))}
+    <div className="mb-5">
+    <button className="btn btn-pink mt-3"  type="button" onClick={addMovement}>Add Movement</button>
+    <button className="btn btn-transparent" type="button" data-bs-toggle="modal" data-bs-target="#NewMovement"><i className="bi bi-box-arrow-up-right text-pink"></i> Didn't Find Your Movement, Create Now</button>
+    </div>
+{/* </div> */}
+<div className="d-flex justify-content-center">
+    <button type="submit" className="btn btn-lg btn-pink">Create</button>
+
 </div>
-<button type="submit" className="btn btn-lg btn-pink">Create</button>
 </form>
 {confirmName && 
-        (<div className="modal d-block" id="renameReminder" tabIndex={-1} aria-hidden="true">
+        (<div className="modal d-block" id="renameReminder" tabIndex={-1}>
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">

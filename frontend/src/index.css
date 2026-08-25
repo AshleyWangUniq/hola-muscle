@@ -33,6 +33,12 @@
   gap: 8px 16px;
 }
 
+.container-three-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px 16px;
+}
+
 .btn-pink {
     background-color: #fac5dd;
     border-color: #fac5dd;
@@ -46,10 +52,38 @@
     color: white;
 }
 
+.btn-transparent {
+    color: #fac5dd;
+}
+.btn-transparent:hover,
+.btn-transparent:active,
+.btn-transparent:focus {
+    color: #faa5cb;
+}
+
 .text-pink {
     color: #fac5dd;
 }
 
 .text-bg-pink {
     background-color: #fac5dd;
+}
+
+.hr {
+  background-color: #fac5dd; /* Sets the color */
+  border: none;             /* Removes default border */
+  height: 1px;              /* Sets line thickness */
+  opacity: 0.5;               /* Overrides Bootstrap's default 0.25 opacity */
+}
+
+.container-grid-movements {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.fixed-conponent {
+    position: sticky;
+    top: 20px;
 }
