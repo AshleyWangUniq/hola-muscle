@@ -2,56 +2,30 @@ import {useState, useEffect } from 'react';
 import {Navigate, useNavigate } from 'react-router-dom';
 import MovementGenerator from '../components/MovementGenerator';
 import type { User } from '../types/user';
+import { useUser } from '../contexts/UserContext';
+import type { ModalProps } from '../types/reuseableModal';
+import ReusableModal from "../components/ReusableModal";
 
-interface movProp {
-  user: User | null;
-}
-
-function NewMovement(user : movProp) {
+function NewMovement() {
   const navigate = useNavigate();
-  // useEffect(()=> {
-  //   if (user.user) {
-  //   }
-  // },[user]);
+  const {user} = useUser();
+
+  const modalProps : ModalProps= {
+    title : "Unknown User", 
+    message : "Please log in to generate your workout.", 
+    cancelButton : {
+      buttonDisplay : "Cancel",
+      buttonAction : () => navigate("/"),
+    },
+    confirmButton : {
+      buttonDisplay : "Log In", 
+      buttonAction : ()=>navigate("/logIn")
+    }
+  }
 
     return <>
-
-    {!user.user && (
-        <div className="modal d-block" tabIndex={-1}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Please Log In</h5>
-              </div>
-
-              <div className="modal-body">
-                You need to log in before creating a movement.
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => {navigate("/");}}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    navigate("/login");
-                  }}
-                >
-                  Log In
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {user.user && <div><MovementGenerator /></div>}
-    
-    {/* {!isLoged && <Navigate to="/Login" />} */}
+    {!user && <div><ReusableModal {...modalProps}/></div>}
+      <div><MovementGenerator /></div>
     </>;
 }
 

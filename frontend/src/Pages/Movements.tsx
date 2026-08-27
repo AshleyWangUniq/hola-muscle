@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import MovementsDisplay from '../components/MovementsDisplay';
 import MuscleList from '../components/MuscleList';
 
-
+// navigate("/Movements", {state: {name:bodypart},});
 
 export default function Movements() {
   const location = useLocation();
-  const name = (location.state as {name : string}).name;
+  const [name, setName] = useState<string>("All");
 
+  useEffect(()=>{
+    if (location.state) {
+          setName((location.state as {name : string}).name);
+      }
+  },[location]);
+  
 
   return (
     <>
@@ -17,7 +23,7 @@ export default function Movements() {
         <div className="fixed-conponent">
           <MuscleList />
         </div>
-    </div>
+    </div> 
     </>
   );
 }

@@ -1,18 +1,25 @@
-import { useContext, useState } from "react";
-import { Navigate, useNavigate, Link } from "react-router-dom";
-import type { User } from "../types/user";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
+import ReusableModal from "../components/ReusableModal";
+import type { ModalProps } from "../types/reuseableModal";
 
 
-interface LoginPageProps {
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-}
-
-function UserRegister({setUser}: LoginPageProps) {
+function UserRegister() {
     const navigate = useNavigate();
-
-    const token = localStorage.getItem("token");
-    if (token) {
-        navigate("/Profile");
+    const {user, register} = useUser();
+    const [showModal, setShowModal] = useState(false);
+    const existedUser : ModalProps= {
+        title : "Existed User", 
+        message : "Existed User",
+        cancelButton : {
+            buttonDisplay : "Cancel",
+            buttonAction : ()=>setShowModal(false)
+        },
+        confirmButton : {
+            buttonDisplay : "Log In",
+            buttonAction : ()=>navigate("/LogIn")
+        }
     }
 
     const [firstName, setFirstName] = useState("");
@@ -27,33 +34,26 @@ function UserRegister({setUser}: LoginPageProps) {
         password,
     };
 
-
+    useEffect(()=>{
+        if (user) {
+            navigate("/Profile");
+        }
+    },[user])
 
     async function handleSubmission(e: React.SyntheticEvent<HTMLFormElement>){
         e.preventDefault();
 
-        // console.log("userData is", userData);
-
-        const response = await fetch("http://localhost:3000/api/Users", {
-            method:"POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userData),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            localStorage.setItem("token", result.token);
-            setUser(result);
-            navigate("/LogIn");
-        } else {
-            alert(result.message);
+        const {status} = await register(userData);
+        if (status === 200) {
+            navigate("/Profile");
         }
-        // console.log(result);
+        if (status === 409) {
+            setShowModal(true);
+        }
     }
 
     return <>
+    {showModal && <div><ReusableModal {...existedUser}/></div>}
     <div className="container">
     <h1 className="text-pink">Register</h1>
     <hr className="hr"></hr>

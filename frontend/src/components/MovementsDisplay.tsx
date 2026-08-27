@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useMovements } from '../contexts/MovementContext';
-import type { Movement } from '../types/movement';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate  } from 'react-router-dom';
+import ReusableModal from './ReusableModal';
+import type { ModalProps } from '../types/reuseableModal';
 
 interface bufferDeleting {
     working: boolean;
+    confirmDel : boolean;
     warningDisplay: boolean;
     movementId: string;
 }
@@ -14,87 +15,78 @@ interface MovementName {
     name : string;
 }
 
-
 function MovementsDisplay(name : MovementName) {
-    const {movements} = useMovements();
+    const navigate = useNavigate();
+    const {movements, deleteMovement} = useMovements();
+    const confrimDel : ModalProps = {
+        title : "Delete Movement?", 
+        message : "Do you want to delete the movement?", 
+        cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>resetBuffer()},
+        confirmButton : {buttonDisplay : "Yes", buttonAction : ()=>deleteMov()}
+    }
+const forceDel : ModalProps = {
+        title : "Movement in Use", 
+        message : "This movement is used in your workouts. Deleting it will also remove it from those workouts. Are you sure you want to continue?", 
+        cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>resetBuffer()},
+        confirmButton : {buttonDisplay : "Yes", buttonAction : ()=>confirmDelete()}
+    }
+
     const muscle = name.name;
-    const [deleteBuffer, setdeleteBuffer] = useState<bufferDeleting>({working: false, warningDisplay: false, movementId: ""});
-
-    useEffect(()=>{
-
-    },[]);
+    const [deleteBuffer, setdeleteBuffer] = useState<bufferDeleting>({working: false, confirmDel: false, warningDisplay: false, movementId: ""});
 
     const displayMovements = muscle === "All" ? movements : movements.filter((mov) => mov.muscleGroups.includes(muscle));
 
     function resetBuffer() {
         console.log("restting");
-        setdeleteBuffer({working: false, warningDisplay: false, movementId: ""});
+        setdeleteBuffer({working: false, confirmDel:false, warningDisplay: false, movementId: ""});
     }
 
-    function takeBuffer(id:string) {
-        setdeleteBuffer({working: true, warningDisplay: true, movementId: id});
-    }
+    // function takeBuffer(id:string) {
+    //     console.log("warningDisplay setting");
+    //     setdeleteBuffer(prev => ({...prev, warningDisplay: true, movementId : id}));
+    //     // setdeleteBuffer({working: true, warningDisplay: true, movementId: id});
+    // }
 
-    async function forceDeletion() {
-        try {
-            console.log("force deleting");
-            const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:3000/api/movements/${deleteBuffer.movementId}?force=true`, {
-                method: "DELETE",
-                headers : {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                
-                throw new Error(data.message);
-            } else {
-                console.log("res is ok", data.message);
-            }
-        } catch(err) {
-            console.log(err);
-        } finally {
-            resetBuffer();
+    //final step, run if movement is used by workout
+    async function confirmDelete() {
+        const response = await deleteMovement({id : deleteBuffer.movementId, forceDeletion : true});
+        if (response && response.status === 200) {
+            alert("Movement deleted.");
         }
+        resetBuffer();
     }
 
-    function editMovement(id : string) {
+    // async function editMovement(id : string) {
+    //     const response = await 
+    // }
 
+    // first step, show confirmation, set id
+    function showDeleteModal(id : string) {
+        setdeleteBuffer(prev => ({...prev, confirmDel:true, movementId: id}));
     }
-    async function deleteMovement(id : string) {
-        try {
-            setdeleteBuffer({working: true, warningDisplay: true, movementId: id});
-            const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:3000/api/movements/${id}`, {
-                method: "DELETE",
-                headers : {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                const data = await res.json();
 
-            if (res.ok) {
-                console.log(data.message);
-            } else {
-                if (res.status === 409) {
-                    console.log("Movement In Use");
-                    takeBuffer(id);
-                    // setDeleteWarning(true);
-                } 
+    //second step, connect to backend to delete
+    async function deleteMov() {
+        const response = await deleteMovement({id : deleteBuffer.movementId, forceDeletion : false});
+        console.log(response);
+        if (response) {
+            if (response.ok) {
+                alert("Movement deleted.");
+            } else if (response.status === 409) {
+                console.log("conflicting");
+                setdeleteBuffer(prev => ({...prev, warningDisplay: true}));
+                // takeBuffer(id);
             }
-        } catch(err) {
-            console.log("no fkkking idea");
         }
     }
 
  
     return (
         <>
-        
         <div>
+            <button type ="button" onClick={() => {navigate("/NewMovement");}} className='float-end btn btn-pink'>New</button>
             <h1 className='text-pink'>{name.name}</h1>
-            {displayMovements.length === 0 && <p className='text-pink'>No movement, <Link className="text-pink" to="/NewMovement">Generate here</Link></p>}
+            {displayMovements.length === 0 && <p className='text-pink'>No movement, click New <i className="bi bi-arrow-up-right-circle"></i> to generate your movement.<Link className="text-pink" to="/NewMovement">Generate here</Link></p>}
             
             <div>
                 {displayMovements.map((mov)=>(
@@ -106,8 +98,10 @@ function MovementsDisplay(name : MovementName) {
                             {/* </div> */}
                             {!mov.isPublic && 
                             <div className='btn-group'>
-                                <button type="button" className='btn btn-sm me-1 btn-pink' onClick={()=>editMovement(mov._id)}>Edit</button>
-                                <button type="button" className='btn btn-sm btn-pink' onClick={()=>deleteMovement(mov._id)}>Delete</button>
+                                <button type="button" className='btn btn-sm me-1 btn-pink' onClick={() =>
+                            navigate(`/EditMovement/${mov._id}`)
+                        }>Edit</button>
+                                <button type="button" className='btn btn-sm btn-pink' onClick={()=>showDeleteModal(mov._id)}>Delete</button>
                             </div>}
                             </div>
                             <p className='card-text'>{mov.description}</p>
@@ -123,30 +117,30 @@ function MovementsDisplay(name : MovementName) {
                 ))}
             </div>
         </div>
+        {deleteBuffer.confirmDel && <div><ReusableModal {...confrimDel}/></div>}
 
-        {deleteBuffer.warningDisplay && 
+        {deleteBuffer.warningDisplay && <div><ReusableModal {...forceDel}/></div>}
+
+        {/* {deleteBuffer.warningDisplay && 
             <div className="modal d-block" tabIndex={-1}>
                 <div className="modal-dialog">
                     <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title text-pink">Movement in Use</h5>
-                        {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close"> */}
-                        {/* <span aria-hidden="true">&times;</span> */}
-                        {/* </button> */}
                     </div>
                     <div className="modal-body">
                         <p>This movement is used in your workouts. Deleting it will also remove it from those workouts. Are you sure you want to continue?</p>
                     </div>
                     <div className="modal-footer">
                         <div className='btn-group'>
-                        <button type="button" className="btn btn-pink me-1" onClick={()=>forceDeletion()}>Force Delete</button>
+                        <button type="button" className="btn btn-pink me-1" onClick={()=>confirmDelete()}>Force Delete</button>
                         <button type="button" className="btn btn-pink" onClick={()=>resetBuffer()}>Cancel</button>
                         </div>
                     </div>
                     </div>
                 </div>
             </div>
-        }
+        } */}
         </>
     );
 }

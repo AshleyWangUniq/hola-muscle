@@ -1,77 +1,63 @@
 
-import { useState, type ReactEventHandler, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMovements } from '../contexts/MovementContext';
-import type { Movement } from '../types/movement';
 import { EQUIPMENT } from '../data/Equipment';
 import { MUSCLE_GROUPS } from '../data/MuscleGroups';
+import { useUser } from '../contexts/UserContext';
+import type { Movement } from '../types/movement';
 
-// const muscleGroupOptions = [
-//     "shoulder",
-//     "Chest",
-//     "Back",
-//     "Legs"
-// ]
+interface thisProp{
+    movement ?: Movement;
+}
 
-// const equipmentOptions = [
-//     "cable",
-//     "barbell",
-//     "dumbbell",
-//     "none",
-//     "band"
-// ]
-
-// interface Movement {
-//   name: string;
-//   description?: string;
-//   muscleGroups: string[];
-//   equipment?: string[] | undefined;
-//     isPublic: boolean;
-// }
-
-function MovementGenerator() {
+function MovementGenerator({movement} : thisProp) {
     // const [movements, setMovements] = useState<Movement[]>([]);
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
-    const [equipment, setEquipment] = useState<string[]>([]);
-    const {movements, addMovement} = useMovements();
+    const [name, setName] = useState<string>(movement?.name ?? "");
+    const [description, setDescription] = useState(movement?.description ?? "");
+    const [muscleGroups, setMuscleGroups] = useState<string[]>(movement?.muscleGroups ?? []);
+    const [equipment, setEquipment] = useState<string[]>(movement?.equipment ?? []);
 
-    async function createMovement(e : React.SyntheticEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        
-
-        const res = await fetch("http://localhost:3000/api/movements", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({name, description, muscleGroups, equipment}),
-        });
-
-        if (!res.ok) {
-            throw new Error("failed to create movement");
+    const { addMovement, editMovement} = useMovements();
+    const {user} = useUser();
+    const navigate = useNavigate();
+    const edit = movement !== undefined;
+    if (movement) {
+        if (movement.description) {
+            setDescription(movement.description);
         }
+        setEquipment(movement.equipment);
+        setMuscleGroups(movement.muscleGroups);
+        setName(movement.name);
+    }
 
-        const newmovement : Movement = await res.json();
-        addMovement(newmovement);
+    function checkValidation() {
+        return false;
+    }
 
-        // setMovements([...movements, newmovement]);
-        setName("");
-        setDescription("");
-        setMuscleGroups([]);
-        setEquipment([]);
+
+    async function handleSubmission(e : React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+        if (checkValidation()) {
+        }
+        if (!user) {
+            return;
+        }  
+        if (edit && movement) {
+            editMovement(movement._id, {name, description, muscleGroups, equipment});
+        } else {
+            addMovement({name, description, muscleGroups, equipment});
+        }
+        navigate("/Movements");
     }
     return <>
       <div className='container'>
         <div className='d-flex justify-content-center'>
-            <h1 className='text-pink'>New Movement</h1>
+            {edit && <h1 className='text-pink'>Edit Movement</h1>}
+            {!edit && <h1 className='text-pink'>New Movement</h1>}
         </div>
         <hr className='hr' />
-        <form onSubmit={createMovement}>
+        <form onSubmit={handleSubmission}>
             <div className='form-group'>
                 <label className='text-pink'>Name</label>
                 <input className="form-control" 
@@ -96,7 +82,6 @@ function MovementGenerator() {
                     <div className="form-check checkbox-container" key={muscle}>
                         <input className="form-check-input" type="checkbox" id={muscle} checked={muscleGroups.includes(muscle)} onChange={(e) => {
                             if (e.target.checked) { setMuscleGroups([...muscleGroups, muscle]);
-
                             } else {
                                 setMuscleGroups(muscleGroups.filter((m) => m !== muscle));
                             }
@@ -125,11 +110,9 @@ function MovementGenerator() {
             <div className='d-flex justify-content-center'>
                 <button type = 'submit' className='btn btn-pink'>Submit</button>
             </div>
-
-            
-            {/* <button type = 'button' onClick={handleSubmission}>Submit</button> */}
         </form>
-    </div></>;
+    </div>
+    </>;
 }
 
 export default MovementGenerator;

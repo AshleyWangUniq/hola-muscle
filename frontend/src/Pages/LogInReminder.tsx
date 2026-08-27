@@ -1,7 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
+import { useEffect } from "react";
 
 export default function LogInReminder() {
     const navigate = useNavigate();
+    const {user} = useUser();
+
+    useEffect(()=>{
+      if (user) {
+        navigate(-1);
+      }
+    },[user]);
+
     return <>
         <div className="modal d-block" tabIndex={-1}>
           <div className="modal-dialog">

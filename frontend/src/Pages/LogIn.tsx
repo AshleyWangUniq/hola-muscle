@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import type { User } from "../types/user";
-import { useMovements } from "../contexts/MovementContext";
-import { useWorkouts } from "../contexts/WorkoutContext";
 import { useUser } from "../contexts/UserContext";
 
-interface LoginPageProps {
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-}
+// interface buttonCombination {
+//     buttonDisplay : string;
+//     buttonAction : () => void;
+// }
 
-function logIn({ setUser }: LoginPageProps) {
+// export interface ModalProps {
+//     title : string;
+//     message : string;
+//     cancelButton ?: buttonCombination;
+//     confirmButton : buttonCombination;
+// }
+
+function logIn() {
 
     const {user, logIn} = useUser();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [warning, setWarning] = useState(false);
+    const [warningMsg, setWarningMsg] = useState("");
     const navigate = useNavigate();
+
 
     useEffect(() => {
         if (user) {
@@ -24,25 +32,13 @@ function logIn({ setUser }: LoginPageProps) {
 
     async function handleSubmission(e: React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
-
-        logIn({email, password});
         
-        // const response = await fetch("http://localhost:3000/api/LogIn", {
-        //     method:"POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({email, password}),
-        // })
 
-        // const result = await response.json();
-        // if(response.ok) {
-        //     localStorage.setItem("token", result.token);
-        //     setUser(result.user);
-        //     refreshMovements();
-        //     loadWorkouts();
-        //     navigate("/");
-        // }
+        const res = await logIn({email, password});
+        if (res.stat !== 200) {
+            setWarning(true);
+            setWarningMsg(res.msg);
+        }
     }
 
     return <>
@@ -58,7 +54,8 @@ function logIn({ setUser }: LoginPageProps) {
             <label>Password</label>
             <input className='form-control' type="password" value={password} onChange={(e)=>setPassword(e.target.value)}></input>
         </div>
-        <button type="submit" className='btn btn-pink'>Sign In</button>
+        <button type="submit" className='btn btn-pink mb-3'>Sign In</button>
+        {warning && <div className="alert alert-light"><i className="bi bi-exclamation-lg"></i>{warningMsg}</div>}
     </form>
     <hr className="hr"></hr>
         <p>Don't have an account yet?

@@ -1,15 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "../types/user";
-import { useMovements } from "./MovementContext";
-import { useWorkouts } from "./WorkoutContext";
 
 interface UserCOntextType {
     user : User | null;
     loading : boolean;
-    register : (userInfo : registerUser) => Promise<void>;
-    logIn : (credentials : {email : string; password : string;}) => Promise<void>;
+    register : (userInfo : registerUser) => Promise<{status:number, message:string}>;
+    logIn : (credentials : {email : string; password : string;}) => Promise<{stat : number, msg : string}>;
     logOut : () => void;
     userProfile : () => User | null;
+    fetchHelper : (url: string, options ?: RequestInit) => Promise<Response>;
 }
 
 interface logInProps {
@@ -36,6 +35,17 @@ export function UserProvider({children} : {children : ReactNode}) {
     useEffect(() => {
         checkUser();
     }, []);
+
+    function fetchHelper(url: string, options : RequestInit = {}) : Promise<Response> {
+        const token = localStorage.getItem("token");
+        const headers = new Headers(options.headers);
+
+        if (token) {
+            headers.set("Authorization", `Bearer ${token}`); 
+        }
+
+        return fetch(url, {...options, headers,});
+    }
 
     async function checkUser() {
         try {
@@ -76,27 +86,31 @@ export function UserProvider({children} : {children : ReactNode}) {
         });
 
         const result = await response.json();
+        console.log(result);
         if (response.ok) {
             localStorage.setItem("token", result.token);
             setUser(result);
+            return {status: 200, message: "suceessful"};
         } else {
-            throw new Error(result.message);
+            return {status : response.status, message: result.message};
         }
         } catch(err) {
             console.log(err);
+            return {status: 500, message: err};
         } finally {
             setLoading(false);
         }
     }
 
+    /**
+     * 
+     * @param credentials 
+     * @return 
+     */
     async function logIn(credentials : logInProps) {
-        console.log(credentials);
-        const token = localStorage.getItem("token");
-        console.log(token);
         try {
             setLoading(true);
             const {email, password} = credentials;
-            console.log("email:", typeof email, " Password: ", typeof password);
             const response = await fetch("http://localhost:3000/api/LogIn", {
                 method:"POST",
                 headers: {
@@ -104,18 +118,22 @@ export function UserProvider({children} : {children : ReactNode}) {
                 },
                 body: JSON.stringify({email, password}),
             })
-
             const result = await response.json();
 
-            if (!response.ok) {
-                throw new Error(result.message);
+            const stat = response.status as number; 
+            const msg = result.message;
+
+            if (response.ok) {
+                localStorage.setItem("token", result.token);
+                setUser(result.user);
             }
-            localStorage.setItem("token", result.token);
-            setUser(result.user);
-            // refreshMovements;
-            // loadWorkouts;
+            return {stat, msg};
+            
         } catch(err) {
+            const msg = err as string;
+            const stat = 500;
             console.log(err);
+            return {stat, msg};
         } finally {
             setLoading(false);
         }
@@ -140,7 +158,8 @@ export function UserProvider({children} : {children : ReactNode}) {
             register,
             logIn,
             logOut,
-            userProfile
+            userProfile,
+            fetchHelper
         }}>{children}</UserContext.Provider>
     )
 }

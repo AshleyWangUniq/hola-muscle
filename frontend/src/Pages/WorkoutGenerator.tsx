@@ -8,6 +8,9 @@ import Select from "react-select";
 import type { Movement } from "../types/movement";
 import { useNavigate } from "react-router-dom";
 import MovementGenerator from "../components/MovementGenerator";
+import { useUser } from "../contexts/UserContext";
+import ReusableModal from "../components/ReusableModal";
+import type {ModalProps } from "../types/reuseableModal";
 /*
 workout 
 */
@@ -48,8 +51,16 @@ function WorkoutGenerator() {
     const [workout, setWorkout] = useState<workout>({name:"My Template", movements: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
     const [movements, setMovements] = useState<MovementForWorkot[]>([]);  
     const {movements: movementsForOptions} = useMovements(); 
+    const {user} = useUser();
     const [confirmName, setConfirmName] = useState(false);
     const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov._id, label: mov.name}));
+    
+    const modalProps : ModalProps = {
+        title : "Unknown User", 
+        message : "Please log in to generate your workout.", 
+        cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>navigate("/")},
+        confirmButton : {buttonDisplay : "Log In", buttonAction : ()=>navigate("/logIn")}
+    }
 
     // const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov.id, label: mov.name, movement: mov}));
     const token = localStorage.getItem("token");
@@ -76,20 +87,13 @@ function WorkoutGenerator() {
     }
 
     useEffect(()=> {
-
-        if (!token) {
-            navigate("/LogInReminder");
+        if (!user) {
+            // console.log("log in reminder");
+            // navigate("/LogInReminder");
         }
-    });
+    },[user]);
     async function geneartion() {
         // e.preventDefault();
-
-        if (!token) {
-            alert("please log in first");
-            return;
-        }
-
-
 
         const finalValue: workout = {...workout, movements: movements};
         console.log("finalValue:", finalValue);
@@ -175,7 +179,7 @@ function WorkoutGenerator() {
 
     function deleteGoal(goal: string) {
         setWorkout(prev => ({...prev, goal: workout.goal.filter(e=>e !==goal)}));
-    }
+    }  
     
     function addMuscle(muscle: string) {
         setWorkout(prev => ({...prev, muscleGroups:[...workout.muscleGroups, muscle]}));
@@ -185,7 +189,7 @@ function WorkoutGenerator() {
     }
 
     return <>
-    {/* <MovementSelector onSelect={addMovement} /> */}
+    {!user && <div><ReusableModal {...modalProps}/></div>}
     <form onSubmit={confirmed}>
     <input className="form-control-lg mb-5 " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
     <div>

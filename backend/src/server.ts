@@ -220,9 +220,22 @@ route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res
     )
 }
 
+app.post("/api/movement/edit",optionalAuthMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const {id, name, description, muscleGroups, equipment} = req.body;
+    if (!req.user) return res.status(401).json({message: "No user found"});
+
+    const result = await Movement.updateOne(
+      {_id : id},
+      {$set: {name : name, description : description, muscleGroups : muscleGroups, equipment : equipment}}
+    )
+  } catch(err) {
+    res.status(500).json({ message: "Failed to update movement" });
+  }
+})
+
 app.post("/api/Users", async (req, res) => {
   try {
-
     const {firstName, lastName, email, password} = req.body;
 
     const existence = await User.findOne({email});
@@ -264,7 +277,7 @@ app.post("/api/LogIn", async (req,res) => {
       console.log("User not found");
     }
 
-    if (!user) {return res.status(404).json({message: "User not found"});}
+    if (!user) {return res.status(404).json({message: "User not found, please check your email"});}
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({message: "Incorrect Password"});
