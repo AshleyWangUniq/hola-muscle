@@ -1,11 +1,13 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMovements } from '../contexts/MovementContext';
 import { EQUIPMENT } from '../data/Equipment';
 import { MUSCLE_GROUPS } from '../data/MuscleGroups';
 import { useUser } from '../contexts/UserContext';
 import type { Movement } from '../types/movement';
+import type { ModalProps } from '../types/reuseableModal';
+import ReusableModal from "./ReusableModal";
 
 interface thisProp{
     movement ?: Movement;
@@ -13,22 +15,49 @@ interface thisProp{
 
 function MovementGenerator({movement} : thisProp) {
     // const [movements, setMovements] = useState<Movement[]>([]);
-    const [name, setName] = useState<string>(movement?.name ?? "");
-    const [description, setDescription] = useState(movement?.description ?? "");
-    const [muscleGroups, setMuscleGroups] = useState<string[]>(movement?.muscleGroups ?? []);
-    const [equipment, setEquipment] = useState<string[]>(movement?.equipment ?? []);
-
+    const [name, setName] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
+    const [equipment, setEquipment] = useState<string[]>([]);
     const { addMovement, editMovement} = useMovements();
     const {user} = useUser();
     const navigate = useNavigate();
     const edit = movement !== undefined;
-    if (movement) {
+    const [showModal, setShow] = useState<boolean>(false);
+    const [created, setCreated] = useState<boolean>(false);
+
+    const addedModal : ModalProps = {
+        title:"Movement Created",
+        message: "Movement is successfully created",
+        cancelButton : {buttonDisplay:"Close", buttonAction:()=>navigate(-1)},
+        confirmButton : {buttonDisplay:"Create Another Movements", buttonAction:()=>resetPage()}
+    }
+
+    const [modalDisplay, setModal] = useState<ModalProps>({
+        title : "",
+        message : "",
+        cancelButton : {buttonDisplay : "Calcel", buttonAction : ()=>setShow(false)},
+        confirmButton : {buttonDisplay : "Confirm", buttonAction : () => navigate(-1)}
+    })
+
+    useEffect(()=>{
+        window.scrollTo(0, 0);
+        if (movement) {
         if (movement.description) {
             setDescription(movement.description);
         }
         setEquipment(movement.equipment);
         setMuscleGroups(movement.muscleGroups);
         setName(movement.name);
+    }
+    },[movement]);
+    
+    function resetPage() {
+        setCreated(false);
+        setName("");
+        setDescription("");
+        setEquipment([]);
+        setMuscleGroups([]);
     }
 
     function checkValidation() {
@@ -44,11 +73,24 @@ function MovementGenerator({movement} : thisProp) {
             return;
         }  
         if (edit && movement) {
-            editMovement(movement._id, {name, description, muscleGroups, equipment});
+            console.log("submit editing");
+            const res = await editMovement(movement._id, {name, description, muscleGroups, equipment});
+            if (res) {
+                if (res.status === 200) {
+                    setShow(true);
+                    setModal(prev => ({...prev, title:"Movement Updated",cancelButton:undefined}));
+                }
+                if (res.status === 304) {
+                    navigate(-1);
+                }
+            }
+            
         } else {
             addMovement({name, description, muscleGroups, equipment});
+            setCreated(true);
+
         }
-        navigate("/Movements");
+        // navigate("/Movements");
     }
     return <>
       <div className='container'>
@@ -112,6 +154,8 @@ function MovementGenerator({movement} : thisProp) {
             </div>
         </form>
     </div>
+    {showModal && <ReusableModal {...modalDisplay} />}
+    {created && <ReusableModal {...addedModal} />}
     </>;
 }
 

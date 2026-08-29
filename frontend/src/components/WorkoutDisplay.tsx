@@ -14,11 +14,16 @@ function WorkoutDisplay() {
     }
 
     return <>
+    <div className="container-grid">
     {workouts.map((w)=>(
         <div> 
             <div className="card small-container" key={w.name}>
-                <div className="card-header">
+                <div className="card-header d-flex justify-content-between">
                     <h5 className="text-pink">{w.name}</h5>
+<div className="btn-group">
+                <button type="button" className="btn btn-pink btn-sm me-1" onClick={() =>navigate("/WorkoutDetail", {state: { workout: w }})}>Detail</button>
+                <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>(setDeleteId(w._id))}>Delete</button>
+                </div>
                 </div>
                 <div className="card-body">
                     <p className="card-text">Difficulty: <span className="badge btn-pink me-1">{w.difficulty}</span></p>
@@ -26,21 +31,13 @@ function WorkoutDisplay() {
                     <p className="card-text">Goals: {w.goal.map((goal)=>(<span className="badge btn-pink me-1">{goal}</span>))}</p>
                     
                 </div>
-                <div className="card-footer">
-<button type="button" className="btn btn-pink btn-sm"
-                        onClick={() =>
-                            navigate("/WorkoutDetail", {
-                                state: { workout: w }
-                            })
-                        }
-                    >
-                        Detail
-                    </button>
-                    <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>(setDeleteId(w._id))}>Delete</button>
-                </div>
+                {/* <div className="card-footer">
+                    
+                </div> */}
             </div>
         </div>
 ))}
+</div>
 {deleteId && (<div className="modal d-block">
     <div className="modal-dialog">
         <div className="modal-content">

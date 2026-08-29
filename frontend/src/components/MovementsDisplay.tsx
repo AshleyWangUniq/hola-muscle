@@ -24,6 +24,18 @@ function MovementsDisplay(name : MovementName) {
         cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>resetBuffer()},
         confirmButton : {buttonDisplay : "Yes", buttonAction : ()=>deleteMov()}
     }
+    const [infoSwitch, setSwitch] = useState(false);
+    const deletedDisplay : ModalProps = {
+        title : "Movement Deleted", 
+        message : "Your movement is successfully deleted.", 
+        confirmButton : {buttonDisplay : "Close", buttonAction : ()=>setSwitch(false)}
+    }
+    const [shoeDelete, setShowDelete] = useState(false);
+    const deleted : ModalProps = {
+        title :"Deleted",
+        message:"Movement is successfully deleted",
+        confirmButton:{buttonDisplay:"Close", buttonAction : ()=>setShowDelete(false)}
+    }
 const forceDel : ModalProps = {
         title : "Movement in Use", 
         message : "This movement is used in your workouts. Deleting it will also remove it from those workouts. Are you sure you want to continue?", 
@@ -51,9 +63,9 @@ const forceDel : ModalProps = {
     async function confirmDelete() {
         const response = await deleteMovement({id : deleteBuffer.movementId, forceDeletion : true});
         if (response && response.status === 200) {
-            alert("Movement deleted.");
+            resetBuffer();
+            setSwitch(true);
         }
-        resetBuffer();
     }
 
     // async function editMovement(id : string) {
@@ -71,7 +83,9 @@ const forceDel : ModalProps = {
         console.log(response);
         if (response) {
             if (response.ok) {
-                alert("Movement deleted.");
+                resetBuffer();
+                // alert("Movement deleted.");
+                setShowDelete(true);
             } else if (response.status === 409) {
                 console.log("conflicting");
                 setdeleteBuffer(prev => ({...prev, warningDisplay: true}));
@@ -117,9 +131,13 @@ const forceDel : ModalProps = {
                 ))}
             </div>
         </div>
+        {infoSwitch && <div><ReusableModal {...deletedDisplay} /></div>}
+
         {deleteBuffer.confirmDel && <div><ReusableModal {...confrimDel}/></div>}
 
         {deleteBuffer.warningDisplay && <div><ReusableModal {...forceDel}/></div>}
+
+        {shoeDelete && <div><ReusableModal {...deleted} /></div>}
 
         {/* {deleteBuffer.warningDisplay && 
             <div className="modal d-block" tabIndex={-1}>

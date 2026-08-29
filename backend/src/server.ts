@@ -228,7 +228,13 @@ app.post("/api/movement/edit",optionalAuthMiddleware, async (req: AuthRequest, r
     const result = await Movement.updateOne(
       {_id : id},
       {$set: {name : name, description : description, muscleGroups : muscleGroups, equipment : equipment}}
-    )
+    );if (result.matchedCount === 0) {
+      return res.status(404).json({message: "No movement found"});
+      }
+      if (result.matchedCount === 1 && result.modifiedCount === 0) {
+        return res.status(304).json({message:"Identical movements, no change made"});
+      }
+    return res.status(200).json({message: "Movement updated."});
   } catch(err) {
     res.status(500).json({ message: "Failed to update movement" });
   }
@@ -277,7 +283,7 @@ app.post("/api/LogIn", async (req,res) => {
       console.log("User not found");
     }
 
-    if (!user) {return res.status(404).json({message: "User not found, please check your email"});}
+    if (!user) {return res.status(404).json({message: "User not found, please check your email."});}
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({message: "Incorrect Password"});

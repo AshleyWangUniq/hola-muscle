@@ -13,9 +13,9 @@ interface MovementContextType {
     loading: boolean;
     refreshMovements: () => Promise<void>;
     addMovement: ({name, description, muscleGroups, equipment}: movData) => void;
-    editMovement:(id : string, {name, description, muscleGroups, equipment} : movData) => Promise<void>;
+    editMovement:(id : string, {name, description, muscleGroups, equipment} : movData) => Promise<Response | void>;
     deleteMovement: ({id, forceDeletion} : {id:string; forceDeletion : boolean;}) => Promise<Response | void>;
-    findMovementById: (id : string) => Movement | null;
+    findMovementById: (id : string) => Movement | undefined;
 }
 
 
@@ -33,7 +33,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
 
     function findMovementById(id : string) {
         const movement = movements.find((mov) => mov._id === id);
-        if (!movement) return null;
         return movement;
     }
 
@@ -49,6 +48,16 @@ export function MovementProvider({children} : {children: ReactNode}) {
             },
             body: JSON.stringify( {id, name, description, muscleGroups, equipment}),
             })
+
+            if (res.ok) {
+                setMovements(prev => prev.map(mov => mov._id ===id ? {...mov, 
+                    name:name, 
+                    description:description,
+                    muscleGroups:muscleGroups,
+                    equipment:equipment
+                } : mov));
+            }
+            return res;
         } catch(err){
             console.log(err);
         } finally {
@@ -89,14 +98,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
             },
             body: JSON.stringify({name, description, muscleGroups, equipment})
         });      
-        // const res = await fetch("http://localhost:3000/api/movements", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         Authorization: `Bearer ${token}`
-        //     },
-        //     body: JSON.stringify({name, description, muscleGroups, equipment}),
-        // });
 
         if (!response.ok) {
             throw new Error("failed to create movement");
@@ -146,6 +147,7 @@ export function MovementProvider({children} : {children: ReactNode}) {
             return res;
         } catch(err) {
             console.log(err);
+            return ;
         } finally {
             setLoading(false);
         }
