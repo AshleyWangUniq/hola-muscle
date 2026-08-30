@@ -1,4 +1,4 @@
-import {Children, createContext, type ReactNode, useContext, useEffect, useState} from "react";
+import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import type {Workout} from "../types/workout";
 import { useUser } from "./UserContext";
 
@@ -21,8 +21,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
         void loadWorkouts();
     },[user]);
 
-
-        async function deleteWorkout(id : string) {
+    async function deleteWorkout(id : string) {
         try {
             setLoading(true);
 
@@ -48,6 +47,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             setLoading(false);
         }
     }
+
     async function loadWorkouts() {
         
         try {

@@ -7,8 +7,10 @@ import Movement from "./models/Movement";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
-import { AuthRequest, authMiddleware, optionalAuthMiddleware } from "./routes/movements";
+import { type AuthRequest, authMiddleware, optionalAuthMiddleware } from "./middleware/authMiddleware";
 import Workout from "./models/Workout";
+import { connectDB } from "./config/db";
+import movementRoutes from "./routes/movementRoutes";
 // import User from "./models/user";
 
 dotenv.config();
@@ -21,21 +23,16 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
 app.use(route);
+app.use("/api/movements", movementRoutes);
 
 
 //MongoDB connection, server starter
-
-if (!MONGO_URI) {
-  throw new Error("No MONGO_URI found in the .env file");
-}
-
-mongoose.connect(MONGO_URI)
-.then(()=>{
-  console.log("MongoDB connected");
-
+async function startServer() {
+  await connectDB();
   app.listen(PORT, ()=>{console.log(`Server is running on ${PORT}`);})
-})
-.catch((error)=>{console.error("MongoDB connection failed", error)});
+}
+startServer();
+
 
 app.get("/", (req, res) => {
   res.send("Server is running");
@@ -60,26 +57,6 @@ route.post("/api/workoutgeneration", authMiddleware, async (req: AuthRequest, re
   }
 });
 
-route.post("/api/movements", authMiddleware, async (req: AuthRequest, res) => {
- try{
-  const {name, description, muscleGroups, equipment} = req.body;
-  if (!req.user) return res.status(401).json({message: "No user found"});
-
-  const newMov = await Movement.create({
-    name,
-    description,
-    muscleGroups,
-    equipment,
-    isPublic: false,
-    belongsTo: req.user.id,
-  });
-
-  res.status(201).json(newMov);
-
- } catch (err) {
-  res.status(500).json({message: "Failed to create movement!"});
- }
-});
 
 route.delete("/api/workout/:id", authMiddleware, async (req: AuthRequest, res) => {
   try {
@@ -96,63 +73,6 @@ route.delete("/api/workout/:id", authMiddleware, async (req: AuthRequest, res) =
     return res.status(200).json({message:"Movement Deleted"});
   } catch(err) {
     return res.status(500).json(err);
-  }
-})
-
-route.delete("/api/movements/:id", authMiddleware, async (req: AuthRequest, res) => {
-  try {
-    if (!req.user) {
-      throw new Error("Not logged user");
-    }
-    const movid = req.params.id;
-    if (typeof movid !== "string") {
-    return res.status(400).json({
-        message: "Invalid movement ID"
-    });
-}
-    const forceDelete = req.query.force === "true";
-    //check if movement is used by any workout
-    const isUsed = await Workout.exists({"movements.movement" : movid});
-
-    if (isUsed && !forceDelete) {
-      const workoutnames = await Workout.find({
-        belongsTo: req.user.id,
-        "movements.movement" : movid
-      }).select("name");
-      return res.status(409).json({
-        message: "The movement is used in other workouts, do you still want to delete it?",
-        requiresConfirmation: true,
-        workouts: workoutnames
-      })
-    }
-
-    if (isUsed && forceDelete) {
-    // delete movement from all workouts 
-      Workout.updateMany({
-        belongsTo: req.user.id,
-        "movements.movement" : movid
-      },
-    {
-      $pull: {
-        movements: {
-          movement : req.params.id
-        }
-      }
-    })
-    }
-
-    //delete the movement
-    const deletion = await Movement.findOneAndDelete({
-      _id: req.params.id,
-      belongsTo: req.user.id
-    })
-    
-    if (!deletion) return res.status(200).json({message: "No Movement Found"});
-
-    return res.status(200).json({message:"Movement Deleted"});
-
-  } catch(err) {
-    res.status(500).json({message: "Failed to delete movement >_<", errormessage: err});
   }
 })
 
@@ -174,41 +94,6 @@ route.get("/api/workouts", optionalAuthMiddleware, async (req: AuthRequest, res)
   }
 });
 
-
-
-route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res) => {
-  try {
-    const targetMuscle = req.query.muscleGroup as string;
-    let movements;
-
-    if (targetMuscle) {
-      if (!req.user) {
-        // return only public mocements 
-         movements = await Movement.find({isPublic: true, muscleGroups: targetMuscle});
-      } else {
-        //return both public and user movements d
-         movements = await Movement.find({muscleGroups: targetMuscle, belongsTo: req.user.id});
-      }
-    } else {
-      if (!req.user) {
-        movements = await Movement.find({isPublic: true});
-      } else {
-        movements = await Movement.find({
-          $or: [
-            {isPublic: true},
-            {belongsTo: req.user.id},
-          ]
-        });
-      }
-       
-    }
-    return res.status(200).json(movements);
-  } catch(err) {
-    res.status(500).json({message: "Failed to fetch movements"});
-  }
-});
-
-
 /** 
  * User Creation & Fetch(Log In)
 */
@@ -219,26 +104,6 @@ route.get("/api/movements", optionalAuthMiddleware, async (req: AuthRequest, res
       {expiresIn: "1d"}
     )
 }
-
-app.post("/api/movement/edit",optionalAuthMiddleware, async (req: AuthRequest, res) => {
-  try {
-    const {id, name, description, muscleGroups, equipment} = req.body;
-    if (!req.user) return res.status(401).json({message: "No user found"});
-
-    const result = await Movement.updateOne(
-      {_id : id},
-      {$set: {name : name, description : description, muscleGroups : muscleGroups, equipment : equipment}}
-    );if (result.matchedCount === 0) {
-      return res.status(404).json({message: "No movement found"});
-      }
-      if (result.matchedCount === 1 && result.modifiedCount === 0) {
-        return res.status(304).json({message:"Identical movements, no change made"});
-      }
-    return res.status(200).json({message: "Movement updated."});
-  } catch(err) {
-    res.status(500).json({ message: "Failed to update movement" });
-  }
-})
 
 app.post("/api/Users", async (req, res) => {
   try {

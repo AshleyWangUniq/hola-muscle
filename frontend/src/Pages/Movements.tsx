@@ -15,7 +15,6 @@ export default function Movements() {
       }
   },[location]);
   
-
   return (
     <>
     <div className='container-grid-movements'>

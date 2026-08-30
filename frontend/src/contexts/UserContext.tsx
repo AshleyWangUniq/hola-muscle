@@ -9,8 +9,12 @@ interface UserCOntextType {
     logOut : () => void;
     userProfile : () => User | null;
     fetchHelper : (url: string, options ?: RequestInit) => Promise<Response>;
+    deleteUser: (password : string)=> Promise<DeleteUserResult>;
 }
-
+interface DeleteUserResult {
+    status: number;
+    msg: string;
+}
 interface logInProps {
     email : string;
     password : string;
@@ -102,6 +106,29 @@ export function UserProvider({children} : {children : ReactNode}) {
         }
     }
 
+     async function deleteUser(password:string) {
+        try {
+            setLoading(true);
+            
+            const res = await fetch("http://localhost:3000/api/user/Delete", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+            if (res.ok) {
+                logOut();
+            }
+            const data = await res.json();
+            return {status: res.status, msg: data.message};
+        } catch(err){
+            console.log(err);
+            return {status: 500, msg: "Something went wrong when deleting the user, plaese try again later"};
+        } finally {
+            setLoading(false);
+        }
+    }
+
     /**
      * 
      * @param credentials 
@@ -117,7 +144,7 @@ export function UserProvider({children} : {children : ReactNode}) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({email, password}),
-            })
+            });
             const result = await response.json();
 
             const stat = response.status as number; 
@@ -159,7 +186,8 @@ export function UserProvider({children} : {children : ReactNode}) {
             logIn,
             logOut,
             userProfile,
-            fetchHelper
+            fetchHelper,
+            deleteUser
         }}>{children}</UserContext.Provider>
     )
 }

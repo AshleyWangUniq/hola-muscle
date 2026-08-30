@@ -3,6 +3,7 @@ import type { Workout } from "../types/workout";
 import { useMovements } from "../contexts/MovementContext";
 import { useEffect, useState } from "react";
 import type { Movement } from "../types/movement";
+import MovementDetailModal from "../components/MovementDetailModal";
 
 interface set {
     id: string;
@@ -17,12 +18,23 @@ interface movementDetail {
     sets : set[];
     cardio: boolean;
 }
+
 export default function WorkoutDetail() {
     const location = useLocation();
     const workout = location.state.workout as Workout;
 
     const {movements, findMovementById} = useMovements();
     const [movementsforThis, setMovementsforThis] = useState<movementDetail[]>([]);
+    const [movId, setMovId] = useState<string>("");
+    const [showMovDetail, setShowMovDetail] = useState<boolean>(false);
+
+    // const [modalDisplay, setModal] = useState<movementModal>({id : "", closeThis: ()=>setShowMovDetail(false)});
+
+    function openMovement(id : string) {
+        console.log("in button");
+        setMovId(id);
+        setShowMovDetail(true);
+    }
 
     function loadMovements() {
         const buffers = workout.movements.map((mov) => {
@@ -52,7 +64,7 @@ export default function WorkoutDetail() {
                         <div className='card-body'> 
                             <div className="card-header d-flex justify-content-between align-items-center">
                                 <h5 className='card-title text-pink mb-0'>{mov.movement.name}</h5>
-                                <i className="bi bi-box-arrow-up-right text-pink"></i>
+                                <button type="button" className="btn" onClick={()=>openMovement(mov.movement._id)}><i className="bi bi-box-arrow-up-right text-pink"></i></button>
                             </div>
                             {mov.cardio && <div>
                                 <ul className="list-group">
@@ -96,7 +108,7 @@ export default function WorkoutDetail() {
         <div className="card" key={workout.name}>
             <div className="card-header">
                 <h5 className="text-pink">{workout.name}</h5>
-                </div>
+            </div>
             <div className="card-body">
                 <p className="card-text">Difficulty: <span className="badge text-bg-primary me-1">{workout.difficulty}</span></p>
                 <p className="card-text">Targeted Muscle Groups: {workout.muscleGroups.map((muscle)=>(<span className="badge text-bg-primary me-1">{muscle}</span>))}</p>
@@ -105,6 +117,8 @@ export default function WorkoutDetail() {
         </div>
     </div>
     </div>
+    {showMovDetail && <div><MovementDetailModal id={movId} closeThis={()=>setShowMovDetail(false)}/></div>}
+    
     </>)
 }
 

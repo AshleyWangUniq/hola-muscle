@@ -41,7 +41,7 @@ export function MovementProvider({children} : {children: ReactNode}) {
     async function editMovement(id : string, {name, description, muscleGroups, equipment} : movData) {
         try {
             setLoading(true);
-            const res = await fetchHelper("http://localhost:3000/api/movement/edit", {
+            const res = await fetchHelper("http://localhost:3000/api/movements/edit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -115,32 +115,39 @@ export function MovementProvider({children} : {children: ReactNode}) {
  * @return 200 if successfully deleted / no movement found
  * @return 500 if cannot delete movement
  */
-    async function deleteMovement({id, forceDeletion} : {id :string, forceDeletion : boolean} ) : Promise<Response | void>{
+    async function deleteMovement({id, forceDeletion} : {id :string, forceDeletion : boolean} ) : Promise<Response | void>
+    {
         try {
             setLoading(true);
-            console.log(id);
-            const token = localStorage.getItem("token");
-            const headers : HeadersInit = {
-                "Content-Type": "application/json",
-            }
-            if (token) {
-                headers.Authorization = `Bearer ${token}`;
-            } else {
-                throw new Error("No User Found");
-            }
 
             const url = forceDeletion ? 
             `http://localhost:3000/api/movements/${id}?force=true`
             : `http://localhost:3000/api/movements/${id}`;
 
-            const res = await fetch(url,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization : `Bearer ${token}`
-                    } 
+            const res = await fetchHelper(url, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
                 }
-            );
+            });
+            // const token = localStorage.getItem("token");
+            // const headers : HeadersInit = {
+            //     "Content-Type": "application/json",
+            // }
+            // if (token) {
+            //     headers.Authorization = `Bearer ${token}`;
+            // } else {
+            //     throw new Error("No User Found");
+            // }
+
+            // const res = await fetch(url,
+            //     {
+            //         method: "DELETE",
+            //         headers: {
+            //             Authorization : `Bearer ${token}`
+            //         } 
+            //     }
+            // );
             if (res.ok) {
                 setMovements(prev => prev.filter(movement => movement._id !== id));
             }
@@ -151,7 +158,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
         } finally {
             setLoading(false);
         }
-
     }
 
     return (
