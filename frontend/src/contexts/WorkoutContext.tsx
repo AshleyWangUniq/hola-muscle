@@ -26,7 +26,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             setLoading(true);
 
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:3000/api/workout/${id}`, {
+            const res = await fetch(`http://localhost:3000/api/workouts/${id}`, {
                 method: "DELETE",
                 headers : {
                     Authorization: `Bearer ${token}`

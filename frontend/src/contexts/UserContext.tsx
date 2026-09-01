@@ -57,7 +57,7 @@ export function UserProvider({children} : {children : ReactNode}) {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const response = await fetch("http://localhost:3000/api/profile", {
+            const response = await fetch("http://localhost:3000/api/users", {
                 method: "GET",
                 headers: {
                 Authorization: `Bearer ${token}`,
@@ -81,7 +81,7 @@ export function UserProvider({children} : {children : ReactNode}) {
     async function register(userInfo : registerUser) {
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:3000/api/Users", {
+            const response = await fetch("http://localhost:3000/api/users", {
             method:"POST",
             headers: {
                 "Content-Type": "application/json",
@@ -138,7 +138,7 @@ export function UserProvider({children} : {children : ReactNode}) {
         try {
             setLoading(true);
             const {email, password} = credentials;
-            const response = await fetch("http://localhost:3000/api/LogIn", {
+            const response = await fetch("http://localhost:3000/api/users/login", {
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json",

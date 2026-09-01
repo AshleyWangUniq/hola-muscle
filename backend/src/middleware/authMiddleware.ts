@@ -7,7 +7,8 @@ export interface AuthRequest extends Request {
     }
 }
 
-interface MyJwtPayload extends JwtPayload {
+
+export interface MyJwtPayload extends JwtPayload {
     userId: string;
 }
 
@@ -19,7 +20,6 @@ export function authMiddleware(
     const header = req.headers.authorization;
 
     if (!header) return res.status(401).json({message: "hi, no token passed"});
-
 
     const token = header.split(" ")[1]!;
 
@@ -53,3 +53,4 @@ export function optionalAuthMiddleware(
     }
     next();
 }
+
