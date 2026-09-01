@@ -53,6 +53,26 @@ export async function createUser(
   }
 }
 
+export async function deletion(
+  req: AuthRequest,
+  res: Response
+) {
+  const password = req.body.password;
+  if(!req.user) {
+    return res.status(404).json({message: "User not found"});
+  }
+  const user = await User.findOne({_id: req.user.id}).select("+password");
+  if (!user) {
+    return res.status(404).json({message: "User not found"});
+  }
+const isMatch = await bcrypt.compare(password, user.password);
+if (!isMatch) {
+  return res.status(401).json({message: "Incorrect Password"});
+}
+await user.deleteOne();
+return res.status(200).json({message: "User deleted"});
+}
+
 export async function logIn(
     req: Request,
     res: Response
@@ -60,10 +80,6 @@ export async function logIn(
   try {
     const {email, password} = req.body;
     const user = await User.findOne({email}).select("+password");
-    if (!user) {
-      console.log("User not found");
-    }
-
     if (!user) {return res.status(404).json({message: "User not found, please check your email."});}
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {

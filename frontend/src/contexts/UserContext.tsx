@@ -9,7 +9,7 @@ interface UserCOntextType {
     logOut : () => void;
     userProfile : () => User | null;
     fetchHelper : (url: string, options ?: RequestInit) => Promise<Response>;
-    deleteUser: (password : string)=> Promise<DeleteUserResult>;
+    deleteUser: (password : string)=> Promise<{status:number, message:string}>;
 }
 interface DeleteUserResult {
     status: number;
@@ -43,12 +43,10 @@ export function UserProvider({children} : {children : ReactNode}) {
     function fetchHelper(url: string, options : RequestInit = {}) : Promise<Response> {
         const token = localStorage.getItem("token");
         const headers = new Headers(options.headers);
-
         if (token) {
             headers.set("Authorization", `Bearer ${token}`); 
         }
-
-        return fetch(url, {...options, headers,});
+        return fetch(url, {...options, headers});
     }
 
     async function checkUser() {
@@ -90,7 +88,6 @@ export function UserProvider({children} : {children : ReactNode}) {
         });
 
         const result = await response.json();
-        console.log(result);
         if (response.ok) {
             localStorage.setItem("token", result.token);
             setUser(result);
@@ -109,21 +106,24 @@ export function UserProvider({children} : {children : ReactNode}) {
      async function deleteUser(password:string) {
         try {
             setLoading(true);
-            
-            const res = await fetch("http://localhost:3000/api/user/Delete", {
+            const token = localStorage.getItem("token");
+            if (!token) return {status: 401, message: "No Token Found"};
+            const res = await fetch("http://localhost:3000/api/users", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                }
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({password})
             });
             if (res.ok) {
                 logOut();
             }
             const data = await res.json();
-            return {status: res.status, msg: data.message};
+            return {status: res.status, message: data.message};
         } catch(err){
             console.log(err);
-            return {status: 500, msg: "Something went wrong when deleting the user, plaese try again later"};
+            return {status: 500, message: "Something went wrong when deleting the user, plaese try again later"};
         } finally {
             setLoading(false);
         }
@@ -168,7 +168,6 @@ export function UserProvider({children} : {children : ReactNode}) {
 
     function logOut() {
         localStorage.removeItem("token");
-        console.log(localStorage.getItem("token"));
         setUser(null);
         // refreshMovements;
         // loadWorkouts;

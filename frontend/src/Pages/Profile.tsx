@@ -8,7 +8,7 @@ function Profile() {
     const {user, deleteUser} = useUser();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
-    const [pwd, setPwd] = useState<string>();
+    const [pwd, setPwd] = useState<string>("");
     const modalDisplay : ModalProps = {
         title:"Delete User",
         message:"Delete user will alsow delete your data, do you still want to delete?",
@@ -17,8 +17,8 @@ function Profile() {
     }
 
     async function deleteThis() {
-        const res = await deleteUser();
-        alert(res.msg);
+        const res = await deleteUser(pwd);
+        alert(res.message);
     }
 
     useEffect(()=>{

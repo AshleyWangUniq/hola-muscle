@@ -130,24 +130,6 @@ export function MovementProvider({children} : {children: ReactNode}) {
                     "Content-Type": "application/json",
                 }
             });
-            // const token = localStorage.getItem("token");
-            // const headers : HeadersInit = {
-            //     "Content-Type": "application/json",
-            // }
-            // if (token) {
-            //     headers.Authorization = `Bearer ${token}`;
-            // } else {
-            //     throw new Error("No User Found");
-            // }
-
-            // const res = await fetch(url,
-            //     {
-            //         method: "DELETE",
-            //         headers: {
-            //             Authorization : `Bearer ${token}`
-            //         } 
-            //     }
-            // );
             if (res.ok) {
                 setMovements(prev => prev.filter(movement => movement._id !== id));
             }

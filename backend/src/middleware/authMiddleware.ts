@@ -24,8 +24,6 @@ export function authMiddleware(
     const token = header.split(" ")[1]!;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as MyJwtPayload;
-    console.log("decoded is", decoded);
-
 
     req.user = {
         id : decoded.userId,

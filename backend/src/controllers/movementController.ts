@@ -115,7 +115,8 @@ export async function deleteMovement(
       belongsTo: req.user.id
     })
     
-    if (!deletion) return res.status(200).json({message: "No Movement Found"});
+    
+    if (!deletion) return res.status(404).json({message: "No Movement Found"});
 
     return res.status(200).json({message:"Movement Deleted"});
 
