@@ -8,8 +8,8 @@ Hola Muscle is an all-in-one fitness platform that helps users customize, organi
 
 * User registration and login
 * JWT authentication
-* Movements management
-* Search movements by muscle group
+* exercise management
+* Search exercuses by muscle group
 
 ### Planned Features
 

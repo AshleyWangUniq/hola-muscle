@@ -12,7 +12,7 @@ function LogInReminderModal(prap : praps) {
               </div>
 
               <div className="modal-body">
-                You need to log in before creating a movement.
+                You need to log in before creating an exercise.
               </div>
 
               <div className="modal-footer">

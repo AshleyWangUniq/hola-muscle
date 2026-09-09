@@ -1,10 +1,12 @@
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
-import type {Workout} from "../types/workout";
+import type {Workout, WorkoutGenerator} from "../types/workout";
 import { useUser } from "./UserContext";
 
 interface WorkoutContextType {
     workouts: Workout[];
     loading: boolean;
+    // generateWorkout : (workout : WorkoutGenerator)=>Promise<{status: number, message: string}>;
+    generateWorkout : (workout : WorkoutGenerator)=>Promise<Response>;
     loadWorkouts: () => Promise<void>;
     deleteWorkout: (id : string) => void;
     addWorkout: (workout : Workout) => void;
@@ -15,23 +17,58 @@ const WorkoutContext = createContext<WorkoutContextType | undefined> (undefined)
 export function WorkoutProvider({children}: {children: ReactNode}) {
     const[workouts, setWorkouts] = useState<Workout[]>([]);
     const[loading, setLoading] = useState(false);
-    const {user} = useUser();
+    const {user, fetchHelper} = useUser();
 
     useEffect(()=> {
         void loadWorkouts();
     },[user]);
+
+    async function generateWorkout(workout : WorkoutGenerator) {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const res = await fetchHelper("http://localhost:3000/api/workouts", true, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(workout),
+        });
+        //     const res = await fetch("http://localhost:3000/api/workouts", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         Authorization: `Bearer ${token}`
+        //     },
+        //     body: JSON.stringify(workout),
+        // });
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data);
+        }
+        const newWorkout : Workout = data;
+        setWorkouts((prev) => [...prev, newWorkout]);
+        return res;
+        // } catch(err) {
+        //     return {status: 500, message: err as string};
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function deleteWorkout(id : string) {
         try {
             setLoading(true);
 
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:3000/api/workouts/${id}`, {
+            const res = await fetchHelper(`http://localhost:3000/api/workouts/${id}`, true, {
                 method: "DELETE",
                 headers : {
                     Authorization: `Bearer ${token}`
                 }
             })
+            if (!res) throw new Error("Unexpected error, please try again lager");
                 const data = await res.json();
 
             if (res.ok) {
@@ -41,28 +78,29 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             } else {
                 throw new Error(data.message);
             }
-        } catch(err){
-            console.log(err);
-        } finally {
+        } 
+        // catch(err){
+        //     console.log(err);
+        // } 
+        finally {
             setLoading(false);
         }
     }
 
     async function loadWorkouts() {
-        
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
+            // const token = localStorage.getItem("token");
 
             const headers : HeadersInit = {
                         "Content-Type": "application/json",
             }
 
-            if (token) {
-                headers.Authorization = `Bearer ${token}`;
-            } 
-            const response = await fetch(`http://localhost:3000/api/workouts`,
+            // if (token) {
+            //     headers.Authorization = `Bearer ${token}`;
+            // } 
+            const response = await fetchHelper(`http://localhost:3000/api/workouts`, false, 
                 {
                     method: "GET",
                     headers,
@@ -73,8 +111,8 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             }
             const workoutsBuffer: Workout[] = await response.json();
             setWorkouts(workoutsBuffer);
-        } catch(err){
-            console.log(err);
+        // } catch(err){
+        //     console.log(err);
         } finally {
             setLoading(false);
         }
@@ -90,6 +128,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
     return(<WorkoutContext.Provider value={
         {workouts, 
             loading, 
+            generateWorkout,
             loadWorkouts, 
             addWorkout,
             deleteWorkout

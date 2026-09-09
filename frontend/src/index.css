@@ -3,12 +3,17 @@
     /* justify-content: center; */
 }
 
+
 .nav-logo{
     justify-content: center;
 }
 
 .nav-left{
     justify-content: left;
+}
+
+.clickable{
+    cursor: pointer;
 }
 
 .form-group {
@@ -72,11 +77,18 @@
 .hr {
   background-color: #fac5dd; /* Sets the color */
   border: none;             /* Removes default border */
-  height: 1px;              /* Sets line thickness */
-  opacity: 0.5;               /* Overrides Bootstrap's default 0.25 opacity */
+  height: 2px;              /* Sets line thickness */
+  opacity: 0.8;               /* Overrides Bootstrap's default 0.25 opacity */
 }
 
-.container-grid-movements {
+.hr-light {
+      background-color: #fac5dd; /* Sets the color */
+  border: none;             /* Removes default border */
+  height: 1px;              /* Sets line thickness */
+  opacity: 0.5;  
+}
+
+.container-grid-exercises {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;

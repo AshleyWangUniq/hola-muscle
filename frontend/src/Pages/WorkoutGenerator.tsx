@@ -3,14 +3,16 @@ import { MUSCLE_GROUPS } from "../data/MuscleGroups";
 import { EQUIPMENT } from "../data/Equipment";
 import { GOALS } from "../data/FitnessGoals";
 import { DIFFICULTY } from "../data/Difficulty";
-import { useMovements } from "../contexts/MovementContext";
+import { useExercises } from "../contexts/ExerciseContext";
 import Select from "react-select";
-import type { Movement } from "../types/movement";
+import type { Exercise } from "../types/exercise";
 import { useNavigate } from "react-router-dom";
-import MovementGenerator from "../components/MovementGenerator";
+import ExerciseGenerator from "../components/ExerciseGenerator";
 import { useUser } from "../contexts/UserContext";
+import { useWorkouts } from "../contexts/WorkoutContext";
 import ReusableModal from "../components/ReusableModal";
 import type {ModalProps } from "../types/reuseableModal";
+import type { WorkoutGenerator, ExerciseForWorkout } from "../types/workout";
 /*
 workout 
 */
@@ -22,38 +24,36 @@ interface set {
     duration?: number;
 }
 
-interface MovementForWorkot {
-    id: string;
-    cardio: boolean;
-    // name: string;
-    // movement: Movement|null;
-    movement: string;
-    sets: set[];
-}
+// interface ExerciseForWorkot {
+//     id: string;
+//     cardio: boolean;
+//     exercise: string;
+//     sets: set[];
+// }
 
-interface MovOption {
+interface ExOption {
     value: string;
     label: string;
-    // movement: Movement;
 }
 
-interface workout {
-    name: string;
-    movements: MovementForWorkot[];
-    muscleGroups: string[];
-    equipment: string[];
-    goal: string[];
-    difficulty: string;
-    duration?: number;
-};
+// interface workout {
+//     name: string;
+//     exercises: ExerciseForWorkout[];
+//     muscleGroups: string[];
+//     equipment: string[];
+//     goal: string[];
+//     difficulty: string;
+//     duration?: number;
+// };
 
 function WorkoutGenerator() {
-    const [workout, setWorkout] = useState<workout>({name:"My Template", movements: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
-    const [movements, setMovements] = useState<MovementForWorkot[]>([]);  
-    const {movements: movementsForOptions} = useMovements(); 
+    const [workout, setWorkout] = useState<WorkoutGenerator>({name:"My Template", exercises: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
+    const [exercises, setExercises] = useState<ExerciseForWorkout[]>([]);  
+    const {exercises: exercisesForOptions} = useExercises(); 
     const {user} = useUser();
+    const {generateWorkout} = useWorkouts();
     const [confirmName, setConfirmName] = useState(false);
-    const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov._id, label: mov.name}));
+    const exercisesOptions : ExOption[] = exercisesForOptions.map((exercise) => ({value: exercise._id, label: exercise.name}));
     
     const modalProps : ModalProps = {
         title : "Unknown User", 
@@ -62,12 +62,10 @@ function WorkoutGenerator() {
         confirmButton : {buttonDisplay : "Log In", buttonAction : ()=>navigate("/logIn")}
     }
 
-    // const movementsOptions : MovOption[] = movementsForOptions.map((mov) => ({value: mov.id, label: mov.name, movement: mov}));
-    const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
     function reset() {
-        setWorkout({name:"My Template", movements: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
+        setWorkout({name:"My Template", exercises: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
         setConfirmName(false);
     }
 
@@ -95,17 +93,9 @@ function WorkoutGenerator() {
     async function geneartion() {
         // e.preventDefault();
 
-        const finalValue: workout = {...workout, movements: movements};
+        const finalValue: WorkoutGenerator = {...workout, exercises: exercises};
         console.log("finalValue:", finalValue);
-        
-        const res = await fetch("http://localhost:3000/api/workoutgeneration", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(finalValue),
-        });
+        const res = await generateWorkout(finalValue);
 
         if (!res.ok) {
             throw new Error("failed to create workout");
@@ -123,49 +113,48 @@ function WorkoutGenerator() {
         setWorkout(prev=>({...prev, name: newName}));
     }
 
-    function setMovementName(selectedMov: MovOption, movid: string) {
-        console.log("setting movement,", selectedMov);
-        setMovements(prev=> (prev.map((mov) => mov.id === movid ? {...mov, movement: selectedMov.value} : mov)));
-        // console.log(movements);
+    function setExerciseName(seletedEx: ExOption, exerciseId: string) {
+        console.log("setting exercise,", seletedEx);
+        setExercises(prev=> (prev.map((exercise) => exercise.id === exerciseId ? {...exercise, exercise: seletedEx.value} : exercise)));
     }
 
     function setDifficulty(diff: string) {
         setWorkout(prev=> ({...prev, difficulty: diff}));
     }
 
-    function deleteMovement(id: string) {
-        setMovements(prev => prev.filter((mov)=> mov.id !== id));
+    function deleteExercise(id: string) {
+        setExercises(prev => prev.filter((exercise)=> exercise.id !== id));
     }
 
-    function addMovement() {
-        setMovements(prev=>[...prev, {id: crypto.randomUUID(), movement: "", sets: [], cardio: false}]);
+    function addExercise() {
+        setExercises(prev=>[...prev, {id: crypto.randomUUID(), exercise: "", sets: [], cardio: false}]);
     }
 
-    function numberReset(movid: string, checked: boolean) {
-        setMovements(prev => prev.map((mov) => mov.id === movid ? {...mov, cardio: checked, sets: mov.sets.map((s) => ({...s, reps: undefined, weight: undefined, duration: undefined })),} : mov));
+    function numberReset(exerciseId: string, checked: boolean) {
+        setExercises(prev => prev.map((exercise) => exercise.id === exerciseId ? {...exercise, cardio: checked, sets: exercise.sets.map((s) => ({...s, reps: undefined, weight: undefined, duration: undefined })),} : exercise));
     }
 
-    function addSet(movid: string) {
-        setMovements(prev => prev.map((mov)=>mov.id === movid? {...mov, sets: [...mov.sets, {id: crypto.randomUUID()}]}:mov
+    function addSet(exerciseId: string) {
+        setExercises(prev => prev.map((exercise)=>exercise.id === exerciseId? {...exercise, sets: [...exercise.sets, {id: crypto.randomUUID()}]}:exercise
     ));
     }
 
-    function changeSetWeight(movid: string, setid: string, newValue: string) {
-        setMovements(prev => prev.map((mov) => mov.id === movid ? {...mov, sets: mov.sets.map((set) => set.id === setid ? {...set, weight: Number(newValue)} : set)}:mov));
+    function changeSetWeight(exerciseId: string, setid: string, newValue: string) {
+        setExercises(prev => prev.map((exercise) => exercise.id === exerciseId ? {...exercise, sets: exercise.sets.map((set) => set.id === setid ? {...set, weight: Number(newValue)} : set)}:exercise));
 
     }
 
-      function changeSetDuration(movid: string, setid: string, newValue: string) {
-        setMovements(prev => prev.map((mov) => mov.id === movid ? {...mov, sets: mov.sets.map((set) => set.id === setid ? {...set, duration: Number(newValue)} : set)}:mov));
+      function changeSetDuration(exerciseId: string, setid: string, newValue: string) {
+        setExercises(prev => prev.map((exercise) => exercise.id === exerciseId ? {...exercise, sets: exercise.sets.map((set) => set.id === setid ? {...set, duration: Number(newValue)} : set)}:exercise));
     }
 
-    function changeSetReps(movid: string, setid: string, newValue: string) {
-        setMovements(prev => prev.map((mov) => mov.id === movid ? {...mov, sets: mov.sets.map((set) => set.id === setid ? {...set, reps: Number(newValue)} : set)}:mov));
+    function changeSetReps(exerciseId: string, setid: string, newValue: string) {
+        setExercises(prev => prev.map((exercise) => exercise.id === exerciseId ? {...exercise, sets: exercise.sets.map((set) => set.id === setid ? {...set, reps: Number(newValue)} : set)}:exercise));
     }
 
-    function deleteSet(movid : string, setid: string) {
-        setMovements(prev =>prev.map((mov)=> 
-            mov.id === movid ? { ...mov, sets: mov.sets.filter((set)=>set.id !== setid)}: mov
+    function deleteSet(exerciseId : string, setid: string) {
+        setExercises(prev =>prev.map((exercise)=> 
+            exercise.id === exerciseId ? { ...exercise, sets: exercise.sets.filter((set)=>set.id !== setid)}: exercise
     ));
     }
 
@@ -191,7 +180,8 @@ function WorkoutGenerator() {
     return <>
     {!user && <div><ReusableModal {...modalProps}/></div>}
     <form onSubmit={confirmed}>
-    <input className="form-control-lg mb-5 " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
+    <input className="form-control-lg mb-2 " value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
+    <hr className='hr' />
     <div>
     <h5 className="text-pink">Targeted Muscles</h5>
     <div className="form-check container-three-cols">
@@ -258,60 +248,59 @@ function WorkoutGenerator() {
         </div>
     </div>
     <hr className='hr' />
-    {movements.map((movement)=> (<div className="card mb-3"  key={movement.id}>
+    {exercises.map((exercise)=> (<div className="card mb-3"  key={exercise.id}>
     <div className="card-body">
-        <button className="btn btn-pink btn-sm float-end"  type="button" onClick={()=>deleteMovement(movement.id)}>Delete Movement</button>
+        <button className="btn btn-pink btn-sm float-end"  type="button" onClick={()=>deleteExercise(exercise.id)}>Delete Exercise</button>
         <div className="d-flex justify-content-between">
             <div className="col-9 me-3">
-        <Select options={movementsOptions} onChange={(option) => {if (option) setMovementName(option, movement.id);}}/>
+        <Select options={exercisesOptions} onChange={(option) => {if (option) setExerciseName(option, exercise.id);}}/>
             </div>
         <div className="form-check form-switch col-3">
-            <input className="form-check-input" type="checkbox" role="role" id={movement.id} checked={movement.cardio} onChange={(e) => numberReset(movement.id, e.target.checked)}></input>
-            <label className="form-check-label" htmlFor={movement.id}>Cardio?</label>
+            <input className="form-check-input" type="checkbox" role="role" id={exercise.id} checked={exercise.cardio} onChange={(e) => numberReset(exercise.id, e.target.checked)}></input>
+            <label className="form-check-label text-pink" htmlFor={exercise.id}>Cardio?</label>
         </div>
             </div>
-        {/* <input type="text" className="form-control-lg" value={movement.name} onChange={(e)=>{setMovName(e.target.value, movement.id)}}></input> */}
-        <button className="btn btn-pink btn-sm mt-2" type="button" onClick={() => addSet(movement.id)}>Add Set</button>
-        {movement.sets.map((set, index) => (
+        <button className="btn btn-pink btn-sm mt-2" type="button" onClick={() => addSet(exercise.id)}>Add Set</button>
+        {exercise.sets.map((set, index) => (
             <div className="row">
-                <div className="col-1  d-flex justify-content-center align-items-center">set {++index}</div>
+                <div className="col-1  d-flex justify-content-center align-items-center"><p className="text-pink">set {++index}</p></div>
             <div className="col-11 mb-3" key={set.id}>
-            {movement.cardio ? (
+            {exercise.cardio ? (
             <div className="row">
                 <div className="col-10">
                     <label className="me-1">Duration in minute:</label>
-                    <input type="number" min="0" value={set.duration ?? ""} onChange={(e) => changeSetDuration(movement.id, set.id, e.target.value)} ></input>
+                    <input type="number" min="0" value={set.duration ?? ""} onChange={(e) => changeSetDuration(exercise.id, set.id, e.target.value)} ></input>
                 </div> 
                 <div className="col-2">
-                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(movement.id, set.id)}>Delete</button>
+                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(exercise.id, set.id)}>Delete</button>
                 </div>
             </div>
             ) :
             (<div className="row">
                 <div className="col-6">
                 <label className="me-1">Weight in kg:</label>
-                <input type="number" min="0" value={set.weight ?? ""} onChange={(e) => changeSetWeight(movement.id, set.id, e.target.value)}></input>
+                <input type="number" min="0" value={set.weight ?? ""} onChange={(e) => changeSetWeight(exercise.id, set.id, e.target.value)}></input>
                 </div>
                 <div className="col-5">
                 <label className="me-1">Reps: </label>
-                <input type="number" min="0" value={set.reps ?? ""} onChange={(e) => changeSetReps(movement.id, set.id, e.target.value)}></input>
+                <input type="number" min="0" value={set.reps ?? ""} onChange={(e) => changeSetReps(exercise.id, set.id, e.target.value)}></input>
                 </div>
                 <div className="col-1">
-                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(movement.id, set.id)}>Delete</button>
+                    <button className="btn btn-pink btn-sm" type="button" onClick={() => deleteSet(exercise.id, set.id)}>Delete</button>
                 </div>
             </div>
             )}
             
             </div>
-            <hr className='hr' />
+            <hr className='hr-light' />
             </div>
         ))}
     </div>
 </div>
 ))}
     <div className="mb-5">
-    <button className="btn btn-pink mt-3"  type="button" onClick={addMovement}>Add Movement</button>
-    <button className="btn btn-transparent" type="button" data-bs-toggle="modal" data-bs-target="#NewMovement"><i className="bi bi-box-arrow-up-right text-pink"></i> Didn't Find Your Movement, Create Now</button>
+    <button className="btn btn-pink mt-3"  type="button" onClick={addExercise}>Add Exercise</button>
+    <button className="btn btn-transparent" type="button" data-bs-toggle="modal" data-bs-target="#NewExercise"><i className="bi bi-box-arrow-up-right text-pink"></i> Didn't Find Your Exercise, Create Now</button>
     </div>
 {/* </div> */}
 <div className="d-flex justify-content-center">
@@ -338,7 +327,7 @@ function WorkoutGenerator() {
         </div> )}
 <div
     className="modal"
-    id="NewMovement"
+    id="NewExercise"
     tabIndex={-1}
     aria-hidden="true"
 >
@@ -346,7 +335,7 @@ function WorkoutGenerator() {
         <div className="modal-content">
 
             <div className="modal-header">
-                <h5 className="modal-title">Create New Movement</h5>
+                <h5 className="modal-title text-pink">Create New Exercise</h5>
 
                 <button
                     type="button"
@@ -357,7 +346,7 @@ function WorkoutGenerator() {
             </div>
 
             <div className="modal-body">
-                <MovementGenerator />
+                <ExerciseGenerator />
             </div>
 
         </div>
@@ -368,4 +357,3 @@ function WorkoutGenerator() {
 
 export default WorkoutGenerator;
 
-//movements mapping 

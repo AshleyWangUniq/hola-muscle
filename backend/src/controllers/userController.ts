@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import User, { IUser } from "../models/User";
 import jwt from "jsonwebtoken";
 import { type MyJwtPayload } from "../middleware/authMiddleware";
+import e from "express";
 
 // app.post("/api/Users", async (req, res) => {
 
@@ -14,6 +15,9 @@ import { type MyJwtPayload } from "../middleware/authMiddleware";
       {expiresIn: "1d"}
     )
 }
+// export async function resetPassword() {
+//   req: 
+// }
 
 export async function createUser(
     req: Request,
@@ -35,7 +39,6 @@ export async function createUser(
       email,
       password: hashedpwd,
     });
-
     await newUser.save();
 
     const token = tokenGenerator(newUser);
@@ -53,13 +56,68 @@ export async function createUser(
   }
 }
 
+export async function updateInfo(
+  req: AuthRequest,
+  res: Response
+) {
+  console.log("updating user info");
+  if(!req.user) {
+    return res.status(401).json({message: "Unauthorized"});
+  }
+  const user = await User.findOne({_id: req.user.id});
+  if (!user) {
+    return res.status(404).json({message: "User not found"});
+  }
+  const {firstName, lastName, email} = req.body;
+  if (firstName!== undefined) {
+    user.firstName = firstName;
+  }
+  if (lastName!== undefined) {
+    user.lastName = lastName;
+  }
+  if (email!== undefined && email != user.email) {
+    const existence = await User.findOne({email});
+    if (existence) {
+      return res.status(409).json({message: "Email is already in use!",});
+    }
+    user.email = email;
+  }
+  await user.save();
+  return res.status(200).json({message: "Information is updated"});
+}
+
+export async function resetPasswords(
+  req: AuthRequest,
+  res: Response
+) {
+  if(!req.user) {
+    return res.status(401).json({message: "Unauthorized"});
+  }
+  const user = await User.findOne({_id: req.user.id}).select("+password");
+  if (!user) {
+    return res.status(404).json({message: "User not found"});
+  }
+
+  const {oldPwd, newPwd, confirmPwd} = req.body;
+  const isMatch = await bcrypt.compare(oldPwd, user.password);
+  if (!isMatch) {
+    return res.status(401).json({message: "Incorrect Password"});
+  }
+  if (newPwd !== confirmPwd) {
+    return res.status(401).json({message: "Confirm password doesn't match"});
+  }
+  user.password = await bcrypt.hash(newPwd, 10);;
+  await user.save();
+  return res.status(200).json({message: "Password is updated"});
+}
+
 export async function deletion(
   req: AuthRequest,
   res: Response
 ) {
   const password = req.body.password;
   if(!req.user) {
-    return res.status(404).json({message: "User not found"});
+    return res.status(401).json({message: "Unauthorized"});
   }
   const user = await User.findOne({_id: req.user.id}).select("+password");
   if (!user) {

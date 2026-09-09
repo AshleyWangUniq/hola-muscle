@@ -23,15 +23,15 @@ const setSchema = new Schema<ISet>(
     }
 )
 
-interface IMovementForWorkout {
+interface IExerciseForWorkout {
     id: String;
     cardio: Boolean;
-    movement: Types.ObjectId;
+    exercise: Types.ObjectId;
     sets: ISet[];
     // duration?: number; 
 }
 
-const movForWorkoutSchema = new Schema<IMovementForWorkout>({
+const exForWorkoutSchema = new Schema<IExerciseForWorkout>({
     id: {
         type: String,
         required: true,
@@ -40,9 +40,9 @@ const movForWorkoutSchema = new Schema<IMovementForWorkout>({
         type: Boolean,
         required: true,
     },
-    movement: {
+    exercise: {
         type: Schema.Types.ObjectId,
-        ref: "Movement",
+        ref: "Exercise",
         required: true,
     },
     sets: {
@@ -57,7 +57,7 @@ const movForWorkoutSchema = new Schema<IMovementForWorkout>({
 
 export interface IWorkout extends Document {
     name: string;
-    movements: IMovementForWorkout[];
+    exercises: IExerciseForWorkout[];
     muscleGroups: string[];
     equipment: string[]; 
     goal: string[]; // gain muscle, gain strength, loss weight
@@ -73,8 +73,8 @@ const WorkoutSchema = new mongoose.Schema<IWorkout>({
         required: true,
     },
 
-    movements: {
-        type: [movForWorkoutSchema],
+    exercises: {
+        type: [exForWorkoutSchema],
         required: true,
     },
     

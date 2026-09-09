@@ -14,8 +14,7 @@ export async function generation(
     const newWorkout = await Workout.create({...workout, belongsTo: req.user.id});
 
     res.status(201).json(newWorkout);
-
-    console.dir(req.body, { depth: null });
+    // console.dir(req.body, { depth: null });
 
   } catch (err) {
     res.status(500).json({message: "Failed to create workout!"});
@@ -35,9 +34,9 @@ export async function deletion(
       belongsTo: req.user.id
     })
 
-    if (!deletion) return res.status(200).json({message: "No Movement Found"});
+    if (!deletion) return res.status(200).json({message: "No Workout Found"});
 
-    return res.status(200).json({message:"Movement Deleted"});
+    return res.status(200).json({message:"Workout Deleted"});
   } catch(err) {
     return res.status(500).json(err);
   }

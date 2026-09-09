@@ -1,36 +1,35 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMovements } from '../contexts/MovementContext';
+import { useExercises } from '../contexts/ExerciseContext';
 import { EQUIPMENT } from '../data/Equipment';
 import { MUSCLE_GROUPS } from '../data/MuscleGroups';
 import { useUser } from '../contexts/UserContext';
-import type { Movement } from '../types/movement';
 import type { ModalProps } from '../types/reuseableModal';
 import ReusableModal from "./ReusableModal";
+import type { Exercise } from '../types/exercise';
 
 interface thisProp{
-    movement ?: Movement;
+    exercise ?: Exercise;
 }
 
-function MovementGenerator({movement} : thisProp) {
-    // const [movements, setMovements] = useState<Movement[]>([]);
+function ExerciseGenerator({exercise} : thisProp) {
     const [name, setName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
     const [equipment, setEquipment] = useState<string[]>([]);
-    const { addMovement, editMovement} = useMovements();
+    const { addExercise, editExercise} = useExercises();
     const {user} = useUser();
     const navigate = useNavigate();
-    const edit = movement !== undefined;
+    const edit = exercise !== undefined;
     const [showModal, setShow] = useState<boolean>(false);
     const [created, setCreated] = useState<boolean>(false);
 
     const addedModal : ModalProps = {
-        title:"Movement Created",
-        message: "Movement is successfully created",
+        title:"Exercise Created",
+        message: "Exercise is successfully created",
         cancelButton : {buttonDisplay:"Close", buttonAction:()=>navigate(-1)},
-        confirmButton : {buttonDisplay:"Create Another Movements", buttonAction:()=>resetPage()}
+        confirmButton : {buttonDisplay:"Create Another Exercises", buttonAction:()=>resetPage()}
     }
 
     const [modalDisplay, setModal] = useState<ModalProps>({
@@ -42,15 +41,15 @@ function MovementGenerator({movement} : thisProp) {
 
     useEffect(()=>{
         window.scrollTo(0, 0);
-        if (movement) {
-        if (movement.description) {
-            setDescription(movement.description);
+        if (exercise) {
+        if (exercise.description) {
+            setDescription(exercise.description);
         }
-        setEquipment(movement.equipment);
-        setMuscleGroups(movement.muscleGroups);
-        setName(movement.name);
+        setEquipment(exercise.equipment);
+        setMuscleGroups(exercise.muscleGroups);
+        setName(exercise.name);
     }
-    },[movement]);
+    },[exercise]);
     
     function resetPage() {
         setCreated(false);
@@ -72,31 +71,34 @@ function MovementGenerator({movement} : thisProp) {
         if (!user) {
             return;
         }  
-        if (edit && movement) {
+        if (edit && exercise) {
             console.log("submit editing");
-            const res = await editMovement(movement._id, {name, description, muscleGroups, equipment});
+            const res = await editExercise(exercise._id, {name, description, muscleGroups, equipment});
             if (res) {
                 if (res.status === 200) {
                     setShow(true);
-                    setModal(prev => ({...prev, title:"Movement Updated",cancelButton:undefined}));
+                    setModal(prev => ({...prev, title:"Exercise Updated",cancelButton:undefined}));
                 }
                 if (res.status === 304) {
                     navigate(-1);
                 }
             }
-            
         } else {
-            addMovement({name, description, muscleGroups, equipment});
-            setCreated(true);
+            const added = await addExercise({name, description, muscleGroups, equipment});
+            if (added.status === 201) {
+                setCreated(true);
+            } else {
+                alert(added.message);
+            }
+            
 
         }
-        // navigate("/Movements");
     }
     return <>
       <div className='container'>
         <div className='d-flex justify-content-center'>
-            {edit && <h1 className='text-pink'>Edit Movement</h1>}
-            {!edit && <h1 className='text-pink'>New Movement</h1>}
+            {edit && <h1 className='text-pink'>Edit Exercise</h1>}
+            {!edit && <h1 className='text-pink'>New Exercise</h1>}
         </div>
         <hr className='hr' />
         <form onSubmit={handleSubmission}>
@@ -159,4 +161,4 @@ function MovementGenerator({movement} : thisProp) {
     </>;
 }
 
-export default MovementGenerator;
+export default ExerciseGenerator;

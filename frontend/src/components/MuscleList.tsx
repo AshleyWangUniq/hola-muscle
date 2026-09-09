@@ -4,7 +4,7 @@ import { MUSCLE_GROUPS } from "../data/MuscleGroups";
 function MuscleList() {
     const navigate = useNavigate();
     const toDetail = (bodypart:string) => {
-        navigate("/Movements", {state: {name:bodypart},});
+        navigate("/Exercises", {state: {name:bodypart},});
     }
 
     return <>

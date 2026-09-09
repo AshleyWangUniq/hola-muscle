@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import MovementsDisplay from '../components/MovementsDisplay';
+import ExerciseDisplay from '../components/ExercisesDisplay';
 import MuscleList from '../components/MuscleList';
 
-// navigate("/Movements", {state: {name:bodypart},});
 
-export default function Movements() {
+export default function exercises() {
   const location = useLocation();
   const [name, setName] = useState<string>("All");
 
@@ -17,8 +16,8 @@ export default function Movements() {
   
   return (
     <>
-    <div className='container-grid-movements'>
-        <div className='scroll-component'><MovementsDisplay name={name} /></div>
+    <div className='container-grid-exercises'>
+        <div className='scroll-component'><ExerciseDisplay name={name} /></div>
         <div className="fixed-conponent">
           <MuscleList />
         </div>

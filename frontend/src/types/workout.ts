@@ -5,17 +5,27 @@ interface set {
     duration?: number;
 }
 
-interface MovementForWorkout {
+export interface ExerciseForWorkout {
     id: string;
     cardio: boolean;
-    movement: string;
+    exercise: string;
     sets: set[];
 }
+
+export interface WorkoutGenerator {
+    name: string;
+    exercises: ExerciseForWorkout[];
+    muscleGroups: string[];
+    equipment: string[];
+    goal: string[];
+    difficulty: string;
+    duration?: number;
+};
 
 export interface Workout {
     _id: string;
     name: string;
-    movements: MovementForWorkout[];
+    exercises: ExerciseForWorkout[];
     muscleGroups: string[];
     equipment: string[];
     goal: string[];

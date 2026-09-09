@@ -1,9 +1,9 @@
 import { useLocation } from "react-router-dom";
 import type { Workout } from "../types/workout";
-import { useMovements } from "../contexts/MovementContext";
 import { useEffect, useState } from "react";
-import type { Movement } from "../types/movement";
-import MovementDetailModal from "../components/MovementDetailModal";
+import type { Exercise } from "../types/exercise";
+import ExerciseDetailModal from "../components/ExerciseDetailModal";
+import { useExercises } from "../contexts/ExerciseContext";
 
 interface set {
     id: string;
@@ -12,9 +12,9 @@ interface set {
     duration?: number;
 }
 
-interface movementDetail {
+interface exerciseDetail {
     id : string;
-    movement : Movement;
+    exercise : Exercise;
     sets : set[];
     cardio: boolean;
 }
@@ -22,62 +22,62 @@ interface movementDetail {
 export default function WorkoutDetail() {
     const location = useLocation();
     const workout = location.state.workout as Workout;
+    // console.log(workout);
+    const {exercises, findExerciseById} = useExercises();
+    const [exercisesforThis, setExercisesforThis] = useState<exerciseDetail[]>([]);
+    const [exerciseId, setExerciseId] = useState<string>("");
+    const [showExerciseDetail, setShowExerciseDetail] = useState<boolean>(false);
 
-    const {movements, findMovementById} = useMovements();
-    const [movementsforThis, setMovementsforThis] = useState<movementDetail[]>([]);
-    const [movId, setMovId] = useState<string>("");
-    const [showMovDetail, setShowMovDetail] = useState<boolean>(false);
-
-    // const [modalDisplay, setModal] = useState<movementModal>({id : "", closeThis: ()=>setShowMovDetail(false)});
-
-    function openMovement(id : string) {
+    function openExercise(id : string) {
         console.log("in button");
-        setMovId(id);
-        setShowMovDetail(true);
+        setExerciseId(id);
+        setShowExerciseDetail(true);
     }
 
-    function loadMovements() {
-        const buffers = workout.movements.map((mov) => {
-            const buffer = findMovementById(mov.movement);
+    function loadExercises() {
+        const buffers = workout.exercises.map((exercise) => {
+            const buffer = findExerciseById(exercise.exercise);
             if (!buffer) {
+                console.log("no matching exercise");
                return undefined;
             }
             return {
-                ...mov,
-                movement: buffer
+                ...exercise,
+                exercise: buffer
             }
         }
-        ).filter((mov): mov is movementDetail => mov !== undefined);
-        setMovementsforThis(buffers);
+        ).filter((exercise): exercise is exerciseDetail => exercise !== undefined);
+        setExercisesforThis(buffers);
     }
 
     useEffect(()=>{
-        loadMovements();
-    },[movements]);
+        loadExercises();
+    },[exercises]);
 
     return (<>
     <div className="row">
     <div className="col-7">
-        <h2>Exercises</h2>
-        {movementsforThis.map((mov) => (
-            <div className='card small-container' key={mov.movement.name}>
+        <h2 className="text-pink">Exercises</h2>
+        {exercisesforThis.length === 0 && <p>No exercise in this workout. </p>}
+        {exercisesforThis.map((exercise) => (
+            <div className='card small-container' key={exercise.exercise.name}>
                         <div className='card-body'> 
                             <div className="card-header d-flex justify-content-between align-items-center">
-                                <h5 className='card-title text-pink mb-0'>{mov.movement.name}</h5>
-                                <button type="button" className="btn" onClick={()=>openMovement(mov.movement._id)}><i className="bi bi-box-arrow-up-right text-pink"></i></button>
+                                <h5 className='card-title text-pink clickable' onClick={()=>openExercise(exercise.exercise._id)}>{exercise.exercise.name}</h5>
+                                <button type="button" onClick={()=>openExercise(exercise.exercise._id)} className="btn"><i className="bi bi-box-arrow-up-right text-pink"></i></button>
                             </div>
-                            {mov.cardio && <div>
+                            {exercise.cardio && <div>
                                 <ul className="list-group">
-                                    {mov.sets.map((set, index)=>(
+                                    {exercise.sets.map((set, index)=>(
                                         <li className="list-group-item row">
                                             <div className="col-3">Set {index}</div>
                                             <div className="col-9">{set.duration}</div>
                                         </li>))}
                                 </ul>
                             </div>}
-                            {!mov.cardio && <div>
+                            {!exercise.cardio && <div>
                                 <ul className="list-group list-group-flush">
-                                    {mov.sets.map((set, index)=>(
+                                    {exercise.sets.map((set, index)=>(
                                         <li className="list-group-item  small-container">
                                             <div className="row">
                                             <div className="col-3 d-flex justify-content-center align-items-center">
@@ -93,11 +93,11 @@ export default function WorkoutDetail() {
                                 </ul>
                             </div>}
                             <div className="card-footer">
-                                <h6>Targmeted Muscle Groups: {mov.movement.muscleGroups.map((muscle) => (
+                                <h6>Targmeted Muscle Groups: {exercise.exercise.muscleGroups.map((muscle) => (
                                 <span className='badge text-bg-pink me-1'>{muscle}</span>
                             ))}
                             </h6>
-                            <h6>Equipment: {mov.movement.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
+                            <h6>Equipment: {exercise.exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
                                 </div>
                         </div>
                     </div> 
@@ -110,17 +110,16 @@ export default function WorkoutDetail() {
                 <h5 className="text-pink">{workout.name}</h5>
             </div>
             <div className="card-body">
-                <p className="card-text">Difficulty: <span className="badge text-bg-primary me-1">{workout.difficulty}</span></p>
-                <p className="card-text">Targeted Muscle Groups: {workout.muscleGroups.map((muscle)=>(<span className="badge text-bg-primary me-1">{muscle}</span>))}</p>
-                <p className="card-text">Goals: {workout.goal.map((goal)=>(<span className="badge text-bg-primary me-1">{goal}</span>))}</p>
+                <p className="card-text">Difficulty: <span className="badge text-bg-pink me-1">{workout.difficulty}</span></p>
+                <p className="card-text">Targeted Muscle Groups: {workout.muscleGroups.map((muscle)=>(<span className="badge text-bg-pink me-1">{muscle}</span>))}</p>
+                <p className="card-text">Goals: {workout.goal.map((goal)=>(<span className="badge text-bg-pink me-1">{goal}</span>))}</p>
             </div>
         </div>
     </div>
     </div>
-    {showMovDetail && <div><MovementDetailModal id={movId} closeThis={()=>setShowMovDetail(false)}/></div>}
+    {showExerciseDetail && <div><ExerciseDetailModal id={exerciseId} closeThis={()=>setShowExerciseDetail(false)}/></div>}
     
     </>)
 }
 
-//two parents left 70% movements, right 30% name, description, diff ... 
 

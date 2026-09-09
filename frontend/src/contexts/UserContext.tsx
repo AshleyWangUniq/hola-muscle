@@ -1,17 +1,31 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "../types/user";
+import Message from "../Message";
 
 interface UserCOntextType {
     user : User | null;
     loading : boolean;
     register : (userInfo : registerUser) => Promise<{status:number, message:string}>;
     logIn : (credentials : {email : string; password : string;}) => Promise<{stat : number, msg : string}>;
+    updateInfo : (info : updateInfoType)=>Promise<{status:number, message:string}>;
     logOut : () => void;
     userProfile : () => User | null;
-    fetchHelper : (url: string, options ?: RequestInit) => Promise<Response>;
+    fetchHelper : (url: string, needUser : boolean, options ?: RequestInit) => Promise<Response>;
     deleteUser: (password : string)=> Promise<{status:number, message:string}>;
+    resetPassword: (pwds: resetPasswordType) => Promise<void>;
 }
-interface DeleteUserResult {
+interface updateInfoType {
+    firstName : string;
+    lastName : string;
+    email : string;
+}
+
+interface resetPasswordType {
+    oldPwd: string;
+    newPwd: string;
+    confirmPwd: string;
+}
+interface responseType {
     status: number;
     msg: string;
 }
@@ -34,24 +48,36 @@ export function UserProvider({children} : {children : ReactNode}) {
     // const {refreshMovements} = useMovements();
     // const {loadWorkouts} = useWorkouts();
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         checkUser();
     }, []);
 
-    function fetchHelper(url: string, options : RequestInit = {}) : Promise<Response> {
-        const token = localStorage.getItem("token");
-        const headers = new Headers(options.headers);
-        if (token) {
-            headers.set("Authorization", `Bearer ${token}`); 
+    function fetchHelper(url: string,  needUser : boolean, options : RequestInit = {}) : Promise<Response> {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            if (needUser && !token) {
+                throw new Error("No User Found");
+            }
+            const headers = new Headers(options.headers);
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`); 
+            }
+            return fetch(url, {...options, headers});
+        } catch(err) {
+            console.log(err);
+            throw err;
+        }finally{
+            setLoading(false);
         }
-        return fetch(url, {...options, headers});
     }
 
     async function checkUser() {
         try {
-            setLoading(true);
+            // setLoading(true);
+            console.log("loading:", loading);
             const token = localStorage.getItem("token");
             if (!token) return;
 
@@ -69,8 +95,45 @@ export function UserProvider({children} : {children : ReactNode}) {
             } else {
                 localStorage.removeItem("token");
             }
-        } catch(err){
-            console.log(err);
+        // } catch(err){
+        //     console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function updateInfo(info:updateInfoType) {
+        try {
+            setLoading(true);
+            if (!user) throw new Error("No User Found");
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No Token Found");
+            const response = await fetch("http://localhost:3000/api/users/updateInfo", {
+            method:"POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(info),
+        });
+        const data = await response.json();
+        console.log(data.message);
+        if (response.ok) {
+            if (info.email !== user.email) {
+                user.email = info.email;
+            }
+            if (info.firstName !== user.firstName) {
+                user.firstName = info.firstName;
+            }
+            if (info.lastName !== user.lastName) {
+                user.lastName = info.lastName;
+            }
+        }
+        const message = data.message as string;
+        return {status : response.status, message};
+        // } catch(err) {
+        //     console.log(err);
+        //     return {status: 500, message: "Something went wrong when updating the user, plaese try again later"};
         } finally {
             setLoading(false);
         }
@@ -91,14 +154,37 @@ export function UserProvider({children} : {children : ReactNode}) {
         if (response.ok) {
             localStorage.setItem("token", result.token);
             setUser(result);
-            return {status: 200, message: "suceessful"};
+            // return {status: 200, message: "suceessful"};
         } else {
-            return {status : response.status, message: result.message};
+            // return {status : response.status, message: result.message};
         }
-        } catch(err) {
-            console.log(err);
-            return {status: 500, message: err};
+        return {status: response.status, message: result.message};
+        // } catch(err) {
+        //     console.log(err);
+        //     return {status: 500, message: err};
         } finally {
+            setLoading(false);
+        }
+    }
+    async function resetPassword(pwds:resetPasswordType) {
+        try{
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const response = await fetch("http://localhost:3000/api/users/resetPassword", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(pwds),
+            });
+            console.log("response is: ", response);
+
+        // }catch(err){
+        //     console.log(err);
+        }finally{
             setLoading(false);
         }
     }
@@ -121,9 +207,9 @@ export function UserProvider({children} : {children : ReactNode}) {
             }
             const data = await res.json();
             return {status: res.status, message: data.message};
-        } catch(err){
-            console.log(err);
-            return {status: 500, message: "Something went wrong when deleting the user, plaese try again later"};
+        // } catch(err){
+        //     console.log(err);
+        //     return {status: 500, message: "Something went wrong when deleting the user, plaese try again later"};
         } finally {
             setLoading(false);
         }
@@ -154,13 +240,12 @@ export function UserProvider({children} : {children : ReactNode}) {
                 localStorage.setItem("token", result.token);
                 setUser(result.user);
             }
-            return {stat, msg};
-            
-        } catch(err) {
-            const msg = err as string;
-            const stat = 500;
-            console.log(err);
-            return {stat, msg};
+            return {stat, msg};          
+        // } catch(err) {
+        //     const msg = err as string;
+        //     const stat = 500;
+        //     console.log(err);
+        //     return {stat, msg};
         } finally {
             setLoading(false);
         }
@@ -186,7 +271,9 @@ export function UserProvider({children} : {children : ReactNode}) {
             logOut,
             userProfile,
             fetchHelper,
-            deleteUser
+            deleteUser,
+            resetPassword,
+            updateInfo
         }}>{children}</UserContext.Provider>
     )
 }

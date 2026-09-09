@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { type AuthRequest, authMiddleware, optionalAuthMiddleware } from "./middleware/authMiddleware";
 import Workout from "./models/Workout";
 import { connectDB } from "./config/db";
-import movementRoutes from "./routes/movementRoutes";
+import exerciseRoutes from "./routes/exerciseRoutes";
 import userRoutes from "./routes/userRoutes";
 import workoutRoutes from "./routes/workoutRoutes";
 
@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(route);
-app.use("/api/movements", movementRoutes);
+app.use("/api/exercises", exerciseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/workouts", workoutRoutes);
 
