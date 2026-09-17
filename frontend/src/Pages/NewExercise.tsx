@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import type { ModalProps } from '../types/reuseableModal';
 import ReusableModal from "../components/ReusableModal";
-import ExerciseGenerator from '../components/exerciseGenerator';
+import ExerciseGenerator from '../components/ExerciseGenerator';
 
 function NewExercise() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { Workout } from "../types/workout";
 import { useEffect, useState } from "react";
 import type { Exercise } from "../types/exercise";
@@ -21,6 +21,7 @@ interface exerciseDetail {
 
 export default function WorkoutDetail() {
     const location = useLocation();
+    const navigate = useNavigate();
     const workout = location.state.workout as Workout;
     // console.log(workout);
     const {exercises, findExerciseById} = useExercises();
@@ -57,6 +58,7 @@ export default function WorkoutDetail() {
     return (<>
     <div className="row">
     <div className="col-7">
+        <button type="button" className="btn btn-pink float-end" onClick={() => navigate(`/EditWorkout/${workout._id}`)}>Edit</button>
         <h2 className="text-pink">Exercises</h2>
         {exercisesforThis.length === 0 && <p>No exercise in this workout. </p>}
         {exercisesforThis.map((exercise) => (

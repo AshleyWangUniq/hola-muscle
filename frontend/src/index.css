@@ -1,15 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
 .navbar{
     background-color: #fac5dd;
+    /* height: 52px; */
+    min-height: 52px;
+    padding: 0;
+    align-items: center;
+
+    /* height: 50px; */
     /* justify-content: center; */
 }
-
-
-.nav-logo{
-    justify-content: center;
+.navbar > .container-fluid {
+    height: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: center;
 }
 
-.nav-left{
-    justify-content: left;
+.navbar-brand {
+    padding: 0;
+    margin: 0;
+}
+
+.navbar-brand img {
+    display: block;
+}
+
+.navbar-toggler {
+    margin: 0;
+}
+
+.input-hola {
+    padding: 10px 14px;
+    border: 1px solid #fac5dd;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #fac5dd
+}
+
+.input-hola:focus {
+    border-color: #fac5dd;
+    color: #d96b9d;
+    box-shadow: 0 0 0 0.2rem rgba(250, 197, 221, 0.3);
+}
+
+.input-hola::placeholder {
+    color: #fac5dd;
+    opacity: 0.7;
+}
+
+.input-textarea {
+    padding: 10px 14px;
+    border: 1px solid #fac5dd;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+.input-textarea:focus {
+    border-color: #fac5dd;
+    box-shadow: 0 0 0 0.2rem rgba(250, 197, 221, 0.3);
+}
+.checkbox {
+    border-color: #fac5dd;
+}
+.checkbox:checked {
+    background-color: #d96b9d;
+    border-color:#d96b9d;
+    box-shadow: 0 0 0 0.2rem #fac5dd;
 }
 
 .clickable{
@@ -21,13 +77,37 @@
 }
 
 .small-container{
-    margin: 10px;
+    margin: 20px;
 }
+
+.main-container {
+    margin: 30px auto;
+    gap: 20px;
+    width: 70%;
+}
+@media (max-width: 1200px) {
+    .main-container {
+        width: 80%;
+    }
+}
+@media (max-width: 992px) {
+    .main-container {
+        width: 95%;
+    }
+}
+
+
 .container{
     margin: 30px auto;
     gap: 20px;
     width: 70%;
 }
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+    }
+}
+
 .container-full{
     width: 100%;
 }
@@ -37,11 +117,27 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px 16px;
 }
+@media (max-width: 768px) {
+    .container-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .container-three-cols {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+    }
+}
 
 .container-three-cols {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px 16px;
+}
+@media (max-width: 768px) {
+    .container-three-cols {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+    }
 }
 
 .btn-pink {
@@ -55,6 +151,16 @@
     background-color: #faa5cb;
     border-color: #fcb3d4;
     color: white;
+}
+
+
+.btn-light {
+    color: #fac5dd;
+}
+.btn-light:hover,
+.btn-light:active,
+.btn-light:focus {
+    color: #d96b9d;
 }
 
 .btn-transparent {
@@ -74,6 +180,10 @@
     background-color: #fac5dd;
 }
 
+.bg-pink {
+    background-color: #fffbfc;
+}
+
 .hr {
   background-color: #fac5dd; /* Sets the color */
   border: none;             /* Removes default border */
@@ -90,7 +200,7 @@
 
 .container-grid-exercises {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 3fr 1fr;
     gap: 20px;
     align-items: start;
 }
@@ -98,4 +208,69 @@
 .fixed-conponent {
     position: sticky;
     top: 20px;
+}
+
+/* col-12 col-lg-5 d-flex justify-content-center align-items-center */
+/* .card-input {
+
+} */
+
+.set-input-row {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 24px;
+    row-gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.set-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.set-field input {
+    width: 80px;
+}
+
+@media (max-width: 600px) {
+    .set-input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .set-field {
+        width: 100%;
+        justify-content: end;
+    }
+
+    .set-action-btn {
+        justify-self: end;
+    }
+}
+
+.muscle-option {
+    padding: 8px 16px;
+    margin: 4px auto;
+    width: 80%;
+    border: none;
+    text-align: center;
+    color: #fac5dd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+
+    transition: background-color 0.15s ease;
+}
+
+.muscle-option:hover {
+    background-color: #fff4f8;
+    color: #faa5cb;
+}
+
+.muscle-option.active {
+    background-color: #fac5dd;
+    font-weight: 500;
 }

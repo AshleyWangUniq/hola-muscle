@@ -12,7 +12,7 @@ export interface ExerciseForWorkout {
     sets: set[];
 }
 
-export interface WorkoutGenerator {
+export interface WorkoutGenerateType {
     name: string;
     exercises: ExerciseForWorkout[];
     muscleGroups: string[];

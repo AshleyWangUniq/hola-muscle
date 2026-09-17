@@ -7,6 +7,7 @@ import { connectDB } from "./config/db";
 import exerciseRoutes from "./routes/exerciseRoutes";
 import userRoutes from "./routes/userRoutes";
 import workoutRoutes from "./routes/workoutRoutes";
+import strengthRecordRoutes from "./routes/strengthRecordRoutes";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(route);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/workouts", workoutRoutes);
+app.use("/api/strength-records", strengthRecordRoutes);
 
 //MongoDB connection, server starter
 async function startServer() {

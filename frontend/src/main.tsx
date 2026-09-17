@@ -6,9 +6,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { ExerciseProvider } from './contexts/ExerciseContext.tsx'
 import { WorkoutProvider } from './contexts/WorkoutContext.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
+import { RecordProvider } from './contexts/RecordContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter><UserProvider><ExerciseProvider><WorkoutProvider><App /></WorkoutProvider></ExerciseProvider></UserProvider></BrowserRouter>
   </StrictMode>,
 )
+{/* <RecordProvider><App /></RecordProvider> */}

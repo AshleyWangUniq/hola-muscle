@@ -1,0 +1,41 @@
+import type { Exercise } from "./exercise";
+
+export interface StrengthRecord {
+    _id : string;
+    name: string;
+    date: Date;
+    duration?: number; // in seconds
+    comment: string;
+    workoutRef ?: string; // id of the workout
+    rating ?: number;
+    exercises : Exercise[];
+}
+
+export interface StrengthRecordGenerateType {
+    name: string;
+    date: Date; 
+    duration?: number; // in seconds
+    comment?: string;
+    workoutRef ?: string; // id of the workout
+    rating?: string;
+    exercises: OneExercise[];
+}
+
+export interface Set { // sets order is not acccessible with index
+    id: string;
+    order: number; //start from 1
+    // setType: string; //choose from SetType
+    dropOrder : number; // for superset/dropset
+    reps: number;
+    weight: number; // 0 for bodyweight
+}
+
+
+
+export interface OneExercise {
+    id: string;
+    exercise : string; // reference to exercise id 
+    name: string; // input or fetch from exericise
+    sets: Set[];
+    difficulty?: string;
+}

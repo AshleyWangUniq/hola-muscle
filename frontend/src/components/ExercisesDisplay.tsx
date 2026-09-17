@@ -19,7 +19,6 @@ interface ExerciseName {
 function ExerciseDisplay(name : ExerciseName) {
     const navigate = useNavigate();
     const {exercises, deleteExercise } = useExercises();
-    console.log(exercises);
     const confrimDel : ModalProps = {
         title : "Delete Exercise?", 
         message : "Do you want to delete the exercise?", 
@@ -88,7 +87,7 @@ const forceDel : ModalProps = {
         <>
         <div>
             <button type ="button" onClick={() => {navigate("/NewExercise");}} className='float-end btn btn-pink'>New</button>
-            <h1 className='text-pink'>{name.name}</h1>
+            <h1 className='text-pink'>Exercises: {name.name}</h1>
             {displayExercises.length === 0 && <p className='text-pink'>No exercise, click New <i className="bi bi-arrow-up-right-circle"></i> to generate your exercise.<Link className="text-pink" to="/NewExercise">Generate here</Link></p>}
             
             <div>

@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useWorkouts } from "../contexts/WorkoutContext";
 import WorkoutDetail from "../Pages/WorkoutDetail";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Workout } from "../types/workout";
 
 function WorkoutDisplay() {
     const {workouts, deleteWorkout} = useWorkouts();
+    const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>(workouts);
     const navigate = useNavigate();
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -13,15 +15,24 @@ function WorkoutDisplay() {
         setDeleteId(null);
     }
 
+    useEffect(() => {
+        setCurrentWorkouts(workouts);
+    }, [workouts]);
+
+    // function selectMuscle(muscle : string) {
+    //     setWorkouts(prev => ())
+    // }
+
     return <>
     <div className="container-grid">
-        {workouts.map((w)=>(
+        {currentWorkouts.map((w)=>(
             <div> 
                 <div className="card small-container" key={w.name}>
                     <div className="card-header d-flex justify-content-between">
                         <h5 className="text-pink">{w.name}</h5>
                         <div className="btn-group">
                             <button type="button" className="btn btn-pink btn-sm me-1" onClick={() =>navigate("/WorkoutDetail", {state: { workout: w }})}>Detail</button>
+                            <button type="button" className="btn btn-pink btn-sm me-1" onClick={() => navigate(`/EditWorkout/${w._id}`)}>Edit</button>
                             <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>(setDeleteId(w._id))}>Delete</button>
                         </div>
                     </div>

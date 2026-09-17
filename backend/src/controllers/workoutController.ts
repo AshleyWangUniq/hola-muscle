@@ -1,4 +1,4 @@
-import { AuthRequest, optionalAuthMiddleware } from "../middleware/authMiddleware";
+import { AuthRequest } from "../middleware/authMiddleware";
 import type { Response } from "express";
 
 import Workout from "../models/Workout";
@@ -15,6 +15,25 @@ export async function generation(
 
     res.status(201).json(newWorkout);
     // console.dir(req.body, { depth: null });
+
+  } catch (err) {
+    res.status(500).json({message: "Failed to create workout!"});
+  }
+}
+
+export async function editWorkout(
+    req: AuthRequest,
+    res: Response
+) {
+  try {
+    const workout = req.body;
+    if (!req.user) return res.status(401).json({message: "No user found"});
+    const updated = await Workout.findOneAndUpdate({
+      _id : workout._id, 
+      belongsTo: req.user.id}, workout, {new : true});
+
+    res.status(201).json(updated);
+    console.dir(req.body, { depth: null });
 
   } catch (err) {
     res.status(500).json({message: "Failed to create workout!"});

@@ -24,8 +24,8 @@ const setSchema = new Schema<ISet>(
 )
 
 interface IExerciseForWorkout {
-    id: String;
-    cardio: Boolean;
+    id: string;
+    cardio: boolean;
     exercise: Types.ObjectId;
     sets: ISet[];
     // duration?: number; 
@@ -55,7 +55,7 @@ const exForWorkoutSchema = new Schema<IExerciseForWorkout>({
 }
 )
 
-export interface IWorkout extends Document {
+export interface IWorkout{
     name: string;
     exercises: IExerciseForWorkout[];
     muscleGroups: string[];
@@ -111,7 +111,7 @@ const WorkoutSchema = new mongoose.Schema<IWorkout>({
     belongsTo:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"User",
-        defualt:null,
+        default:null,
         select: false,
     },
 

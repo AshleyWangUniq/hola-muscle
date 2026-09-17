@@ -29,7 +29,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
 
     useEffect(()=>{
         refreshExercises();
-        console.log(exercises);
+        // console.log(exercises);
     },[user]);
 
     function findExerciseById(id : string) {
@@ -87,12 +87,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
         }
     }
 
-    async function addExercise({name, description, muscleGroups, equipment}: {
-        name : string;
-        description : string;
-        muscleGroups : string[];
-        equipment : string[];
-    }) {
+    async function addExercise({name, description, muscleGroups, equipment}: exerciseData) {
         try {
             setLoading(true);
         const exists = exercises.some(exercise => exercise.name === name);

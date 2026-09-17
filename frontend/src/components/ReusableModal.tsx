@@ -12,7 +12,7 @@ function reusableModal({ title, message, cancelButton, confirmButton } : ModalPr
                     <p>{message}</p>
                 </div>
                 <div className="modal-footer">
-                    {cancelButton && <button type="button" className="btn btn-light me-1" onClick={cancelButton.buttonAction}>{cancelButton.buttonDisplay}</button>}
+                    {cancelButton && <button type="button" className="btn btn-light text-pink me-1" onClick={cancelButton.buttonAction}>{cancelButton.buttonDisplay}</button>}
                     <button type="button" className="btn btn-pink" onClick={confirmButton.buttonAction}>{confirmButton.buttonDisplay}</button>
                 </div>
             </div>

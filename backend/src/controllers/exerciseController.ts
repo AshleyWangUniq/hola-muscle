@@ -11,6 +11,11 @@ export async function generateExercise(
  try{
   const {name, description, muscleGroups, equipment} = req.body;
   if (!req.user) return res.status(401).json({message: "No user found"});
+  const exist = await Exercise.find({name: name});
+
+  if (exist) {
+    return res.status(401).json({message: "Exercise already exist"});
+  }
 
   const newMov = await Exercise.create({
     name,
@@ -131,9 +136,10 @@ export async function editExercise(
     if (!req.user) return res.status(401).json({message: "No user found"});
 
     const result = await Exercise.updateOne(
-      {_id : id},
+      {_id : id, belongsTo: req.user.id},
       {$set: {name : name, description : description, muscleGroups : muscleGroups, equipment : equipment}}
-    );if (result.matchedCount === 0) {
+    );
+    if (result.matchedCount === 0) {
       return res.status(404).json({message: "No Exercise found"});
       }
       if (result.matchedCount === 1 && result.modifiedCount === 0) {

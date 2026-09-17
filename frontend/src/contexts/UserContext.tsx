@@ -56,7 +56,7 @@ export function UserProvider({children} : {children : ReactNode}) {
 
     function fetchHelper(url: string,  needUser : boolean, options : RequestInit = {}) : Promise<Response> {
         try {
-            setLoading(true);
+            setLoading(true);   
             const token = localStorage.getItem("token");
             if (needUser && !token) {
                 throw new Error("No User Found");

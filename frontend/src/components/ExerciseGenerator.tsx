@@ -29,7 +29,7 @@ function ExerciseGenerator({exercise} : thisProp) {
         title:"Exercise Created",
         message: "Exercise is successfully created",
         cancelButton : {buttonDisplay:"Close", buttonAction:()=>navigate(-1)},
-        confirmButton : {buttonDisplay:"Create Another Exercises", buttonAction:()=>resetPage()}
+        confirmButton : {buttonDisplay:"Create Another Exercise", buttonAction:()=>resetPage()}
     }
 
     const [modalDisplay, setModal] = useState<ModalProps>({
@@ -104,7 +104,7 @@ function ExerciseGenerator({exercise} : thisProp) {
         <form onSubmit={handleSubmission}>
             <div className='form-group'>
                 <label className='text-pink'>Name</label>
-                <input className="form-control" 
+                <input className="form-control input-hola" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 />
@@ -113,7 +113,7 @@ function ExerciseGenerator({exercise} : thisProp) {
             <div className='form-group'>
                 <label className='text-pink'>Description</label>
                 <textarea 
-                className='form-control'
+                className='form-control input-textarea'
                 value = {description}
                 onChange={(e) => setDescription(e.target.value)}
                 />
@@ -124,7 +124,7 @@ function ExerciseGenerator({exercise} : thisProp) {
                 <div className='container-grid'>
                 {MUSCLE_GROUPS.map((muscle) => (
                     <div className="form-check checkbox-container" key={muscle}>
-                        <input className="form-check-input" type="checkbox" id={muscle} checked={muscleGroups.includes(muscle)} onChange={(e) => {
+                        <input className="form-check-input checkbox" type="checkbox" id={muscle} checked={muscleGroups.includes(muscle)} onChange={(e) => {
                             if (e.target.checked) { setMuscleGroups([...muscleGroups, muscle]);
                             } else {
                                 setMuscleGroups(muscleGroups.filter((m) => m !== muscle));
@@ -142,7 +142,7 @@ function ExerciseGenerator({exercise} : thisProp) {
                 <div className='container-grid'>
                 {EQUIPMENT.map((equip) => (
                     <div className='form-check checkbox-container' key = {equip}>
-                        <input className='form-check-input' type='checkbox' id={equip} checked={equipment.includes(equip)} onChange={(e) => {
+                        <input className='form-check-input checkbox' type='checkbox' id={equip} checked={equipment.includes(equip)} onChange={(e) => {
                             if (e.target.checked) { setEquipment([...equipment, equip]);}
                             else { setEquipment(equipment.filter((eq) => eq !== equip));}
                         }} />

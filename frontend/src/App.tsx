@@ -14,17 +14,21 @@ import Profile from "./Pages/Profile";
 import LogInReminder from "./Pages/LogInReminder";
 import WorkoutDetail from "./Pages/WorkoutDetail";
 import EditExercise from "./Pages/EditExercise";
+import EditWorkout from "./Pages/EditWorkout";
 import NewExercise from "./Pages/NewExercise";
+import Records from "./Pages/Records";
+import AddRecord from "./Pages/AddRecord";
 
 
 function App() {
   return <div><NavBar />
-  <div className="container">
+  <div className="main-container">
   <Routes>
     <Route path="/" element = {<HomePage/>} />
     <Route path="/Exercises" element={<Exercises />} />
     <Route path="/NewExercise" element={<NewExercise />} />
     <Route path="/EditExercise/:id" element={<EditExercise />} />
+    <Route path="/EditWorkout/:id" element={<EditWorkout />} />
     <Route path="/UserRegister" element={<UserRegister />} />
     <Route path="/LogIn" element={<LogIn />} />
     <Route path="/WorkoutPage" element={<WorkoutPage />} />
@@ -32,6 +36,8 @@ function App() {
     <Route path="/WorkoutGenerator" element={<WorkoutGenerator />} />
     <Route path="/LogInReminder" element={<LogInReminder />} />
     <Route path="/WorkoutDetail" element={<WorkoutDetail />} />
+    <Route path="/Records" element={<Records />} />
+    <Route path="/Addrecord" element={<AddRecord />} />
   </Routes>
   </div>
 </div>;
