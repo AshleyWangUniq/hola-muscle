@@ -8,7 +8,7 @@ interface set {
 export interface ExerciseForWorkout {
     id: string;
     cardio: boolean;
-    exercise: string;
+    exercise: string; // exercise id
     sets: set[];
 }
 

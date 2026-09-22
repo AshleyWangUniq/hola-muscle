@@ -33,7 +33,6 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     },[user]);
 
     function findExerciseById(id : string) {
-        console.log("id is: ", id);
         const exercise = exercises.find((exercise) => exercise._id === id);
         return exercise;
     }
@@ -103,7 +102,10 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
         });
         const data = await response.json();
         if (!response.ok) {
-            throw new Error(data);
+            console.log(data.message);
+            // throw new Error(data);
+        } else {
+            console.log("ex created");
         }
         const newExercise : Exercise = data;
         setExercises((prev) => [...prev, newExercise]);

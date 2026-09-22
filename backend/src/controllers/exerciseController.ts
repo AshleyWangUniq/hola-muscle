@@ -11,13 +11,14 @@ export async function generateExercise(
  try{
   const {name, description, muscleGroups, equipment} = req.body;
   if (!req.user) return res.status(401).json({message: "No user found"});
-  const exist = await Exercise.find({name: name});
+  console.log(name);
+  const exist = await Exercise.findOne({name: name, belongsTo: req.user.id,});
 
   if (exist) {
     return res.status(401).json({message: "Exercise already exist"});
   }
 
-  const newMov = await Exercise.create({
+  const newEx = await Exercise.create({
     name,
     description,
     muscleGroups,
@@ -25,7 +26,7 @@ export async function generateExercise(
     isPublic: false,
     belongsTo: req.user.id,
   });
-  res.status(201).json(newMov);
+  res.status(201).json(newEx);
  } catch (err) {
   res.status(500).json(err);
  }
@@ -73,7 +74,7 @@ export async function deleteExercise(
 ) {
   try {
     if (!req.user) {
-      throw new Error("Not logged user");
+      return res.status(401).json({message: "No User Found"});
     }
     const movid = req.params.id;
     if (typeof movid !== "string") {

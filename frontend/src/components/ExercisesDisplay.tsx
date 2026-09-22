@@ -3,6 +3,7 @@ import { useExercises } from '../contexts/ExerciseContext';
 import { Link, useNavigate  } from 'react-router-dom';
 import ReusableModal from './ReusableModal';
 import type { ModalProps } from '../types/reuseableModal';
+import { useUser } from '../contexts/UserContext';
 
 interface bufferDeleting {
     working: boolean;
@@ -18,6 +19,7 @@ interface ExerciseName {
 
 function ExerciseDisplay(name : ExerciseName) {
     const navigate = useNavigate();
+    const {user} = useUser();
     const {exercises, deleteExercise } = useExercises();
     const confrimDel : ModalProps = {
         title : "Delete Exercise?", 
@@ -88,14 +90,15 @@ const forceDel : ModalProps = {
         <div>
             <button type ="button" onClick={() => {navigate("/NewExercise");}} className='float-end btn btn-pink'>New</button>
             <h1 className='text-pink'>Exercises: {name.name}</h1>
-            {displayExercises.length === 0 && <p className='text-pink'>No exercise, click New <i className="bi bi-arrow-up-right-circle"></i> to generate your exercise.<Link className="text-pink" to="/NewExercise">Generate here</Link></p>}
+            {!user && <p className='text-pink'>Log in to see your exercises <Link className="text-pink" to="/LogIn">Log in</Link></p>}
+            {displayExercises.length === 0 && <p className='text-pink'>No exercise, click New <i className="bi bi-arrow-up-right-circle"></i> to generate your exercise.</p>}
             
             <div>
                 {displayExercises.map((exercise)=>(
                     // (mov.muscleGroups.includes(muscle)) && 
                     <div className='card small-container' key={exercise.name}>
-                        <div className='card-body'> 
-                            <div className='card-header d-flex justify-content-between'>
+                        {/* <div className='card-body'>  */}
+                            <div className='card-header d-flex justify-content-between bg-pink'>
                             <h5 className='card-title text-pink'>{exercise.name}</h5>
                             {/* </div> */}
                             {!exercise.isPublic && 
@@ -106,15 +109,17 @@ const forceDel : ModalProps = {
                                 <button type="button" className='btn btn-sm btn-pink' onClick={()=>showDeleteModal(exercise._id)}>Delete</button>
                             </div>}
                             </div>
+                            <div className='card-body'>
                             <p className='card-text'>{exercise.description}</p>
-                            <div className="card-footer">
+                            </div>
+                            <div className="card-footer bg-pink">
                             <h6>Targmeted Muscle Groups: {exercise.muscleGroups.map((muscle) => (
                                 <span className='badge text-bg-pink me-1'>{muscle}</span>
                             ))}
                             </h6>
                             <h6>Equipment: {exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
                             </div>
-                        </div>
+                        {/* </div> */}
                     </div>                        
                 ))}
             </div>

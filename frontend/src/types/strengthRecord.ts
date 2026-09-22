@@ -1,4 +1,5 @@
 import type { Exercise } from "./exercise";
+import type { ExerciseForWorkout } from "./workout";
 
 export interface StrengthRecord {
     _id : string;
@@ -39,3 +40,9 @@ export interface OneExercise {
     sets: Set[];
     difficulty?: string;
 }
+
+// function convertExercise(wkEx: ExerciseForWorkout) {
+//         const newId = crypto.randomUUID();
+//         const oneEx : OneExercise = {id : crypto.randomUUID(), sets:}
+//         // setExercises(prev => [...prev, {id:  newId, exercise: "", name: "", sets: []}]);
+// }

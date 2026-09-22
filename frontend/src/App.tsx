@@ -18,6 +18,7 @@ import EditWorkout from "./Pages/EditWorkout";
 import NewExercise from "./Pages/NewExercise";
 import Records from "./Pages/Records";
 import AddRecord from "./Pages/AddRecord";
+import PickWorkout from "./Pages/PickWorkout";
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
     <Route path="/WorkoutDetail" element={<WorkoutDetail />} />
     <Route path="/Records" element={<Records />} />
     <Route path="/Addrecord" element={<AddRecord />} />
+    <Route path="/PickWorkout" element={<PickWorkout />} />
   </Routes>
   </div>
 </div>;

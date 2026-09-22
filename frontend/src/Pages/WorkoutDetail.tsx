@@ -63,8 +63,8 @@ export default function WorkoutDetail() {
         {exercisesforThis.length === 0 && <p>No exercise in this workout. </p>}
         {exercisesforThis.map((exercise) => (
             <div className='card small-container' key={exercise.exercise.name}>
-                        <div className='card-body'> 
-                            <div className="card-header d-flex justify-content-between align-items-center">
+                        {/* <div className='card-body'>  */}
+                            <div className="card-header bg-pink d-flex justify-content-between align-items-center">
                                 <h5 className='card-title text-pink clickable' onClick={()=>openExercise(exercise.exercise._id)}>{exercise.exercise.name}</h5>
                                 <button type="button" onClick={()=>openExercise(exercise.exercise._id)} className="btn"><i className="bi bi-box-arrow-up-right text-pink"></i></button>
                             </div>
@@ -94,21 +94,21 @@ export default function WorkoutDetail() {
                                     ))}
                                 </ul>
                             </div>}
-                            <div className="card-footer">
+                            <div className="card-footer bg-pink">
                                 <h6>Targmeted Muscle Groups: {exercise.exercise.muscleGroups.map((muscle) => (
                                 <span className='badge text-bg-pink me-1'>{muscle}</span>
                             ))}
                             </h6>
                             <h6>Equipment: {exercise.exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
                                 </div>
-                        </div>
+                        {/* </div> */}
                     </div> 
 
                         ))}
     </div>
     <div className="col-4">
         <div className="card" key={workout.name}>
-            <div className="card-header">
+            <div className="card-header bg-pink">
                 <h5 className="text-pink">{workout.name}</h5>
             </div>
             <div className="card-body">

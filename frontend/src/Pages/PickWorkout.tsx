@@ -2,13 +2,14 @@ import { useNavigate } from "react-router-dom";
 import type { Workout } from "../types/workout";
 import WorkoutDisplay from "../components/WorkoutDisplay";
 
- function WorkoutPage() {
+ function PickWorkout() {
     const navigate = useNavigate();
+    
   
     return <>
-    <div>
+    {/* <div>
         <h1 className="text-pink">Workouts</h1>
-        </div>
+        </div> */}
         <div>
             <WorkoutDisplay />
         </div>
@@ -17,4 +18,4 @@ import WorkoutDisplay from "../components/WorkoutDisplay";
 
 }
 
-export default WorkoutPage;
+export default PickWorkout;

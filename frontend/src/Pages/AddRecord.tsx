@@ -7,6 +7,7 @@ import type { ModalProps } from "../types/reuseableModal";
 import { useNavigate } from "react-router-dom";
 import ReusableModal from "../components/ReusableModal";
 import { Rating } from "../data/Rating";
+import ExerciseGenerator from "../components/ExerciseGenerator";
 
 interface ExOption {
     value: string;
@@ -47,12 +48,22 @@ function AddRecord() {
     }
     const navigate = useNavigate();
 
-        const modalProps : ModalProps = {
-            title : "Unknown User", 
-            message : "Please log in to generate your workout.", 
-            cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>navigate("/Records")},
-            confirmButton : {buttonDisplay : "Log In", buttonAction : ()=>navigate("/logIn")}
-        }
+    const unknownUserModal : ModalProps = {
+        title : "Unknown User", 
+        message : "Please log in to generate your workout.", 
+        cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>navigate("/Records")},
+        confirmButton : {buttonDisplay : "Log In", buttonAction : ()=>navigate("/logIn")}
+    }
+    const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+
+    const confirmFinish : ModalProps = {
+        title : "Confirm", 
+        message : "Record cannot be modified after submit, do you want to finish?", 
+        cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>setShowConfirmFinish(false)},
+        confirmButton : {buttonDisplay : "Confirm", buttonAction : ()=>submitRecord()}
+    }
+
+    const [confirmedPast, setConfirmedPast] = useState(false);
 
     useEffect(()=> {
         if (!startAt) return;
@@ -66,7 +77,7 @@ function AddRecord() {
 
 //pop up a confirm finish window
 // If no name and other thing added, let user add in
-async function clickFinish() {
+async function submitRecord() {
     if (record.name === "") {
         console.log("no name");
         setRecord(prev => ({...prev, name: "Workout "+ record.date.toLocaleDateString("en-AU")}));
@@ -77,9 +88,6 @@ async function clickFinish() {
     if (duration > 0) {
         setRecord(prev => ({...prev, duration: Math.floor(duration/1000)}));
     }
-    setRecord
-    console.log(record);
-    console.log(recordExerices);
     const finalRecord : StrengthRecordGenerateType = {...record, exercises: recordExerices};
     console.log(finalRecord);
     const res = await fetchHelper("http://localhost:3000/api/strength-records", true, {
@@ -87,13 +95,15 @@ async function clickFinish() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(finalRecord),
     });
-    console.log(res);
+
+    if (res.ok) navigate(-1);
 }
 
 //actual form submission
 function finishRecording(e : React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (startAt) setDuration(Date.now() - startAt + elapsed);
+    pauseTimer();
+    setShowConfirmFinish(true);
 }
 
 function timeConverter(interval : number) {
@@ -133,6 +143,10 @@ function duplicateSet(exId: string, set : Set) {
         }
     }
     ));    
+}
+
+function setName(name : string) {
+    setRecord(prev => ({...prev, name: name}));
 }
 
 function setRating(rating : string) {
@@ -235,7 +249,8 @@ function pauseTimer() {
 
     return <>
     <div className='container'>
-        {!user && <div><ReusableModal {...modalProps}/></div>}
+        {showConfirmFinish && <div><ReusableModal {...confirmFinish}/></div>}
+        {!user && <div><ReusableModal {...unknownUserModal}/></div>}
         {deleteDisplay && <div><ReusableModal {...deleteWarning}/></div>}
         <form onSubmit={finishRecording}>
             <div className="row mb-2">
@@ -253,7 +268,7 @@ function pauseTimer() {
                 </div>
                 <div className="col-9">
                     <div className='d-flex justify-content-center'>
-                                    <input  type="text" className="form-control form-control-lg text-center input-hola"  placeholder={`Default Name: Workout ${record.date.toLocaleDateString("en-AU")}`}></input>
+                        <input  type="text" className="form-control form-control-lg text-center input-hola" onChange={(e)=>setName(e.target.value)} placeholder={`Default Name: Workout ${record.date.toLocaleDateString("en-AU")}`}></input>
                     </div>
                 </div>
             </div>
@@ -323,8 +338,12 @@ function pauseTimer() {
                                 <hr className="hr" />
                             </div>
                         ))}
-                        {current.workingOn && current.exId === ex.id && 
-                        <button type="button" className="btn btn-pink btn-sm" onClick={()=> addSetInitial(ex.id)}>Add set</button>}
+                        {current.workingOn && current.exId === ex.id && (
+                            <div>
+                                <button type="button" className="btn btn-pink btn-sm" onClick={()=> addSetInitial(ex.id)}>Add set</button>
+                                <button className="btn btn-transparent" type="button" data-bs-toggle="modal" data-bs-target="#NewExercise"><i className="bi bi-box-arrow-up-right text-pink"></i> Didn't Find Your Exercise, Create Now</button>
+                            </div>
+                        )}
                     </div> 
                 </div> //finish card
             ))}
@@ -334,7 +353,25 @@ function pauseTimer() {
                 (<div>
                     <div>
                         <h3 className="text-pink mb-4">Summary</h3>
+                        {duration === 0 && elapsed === 0 && <div>
+                            <h5 className="text-pink">Are you recording a past workout?</h5>
+                        <div className="mb-3">
+                            {confirmedPast && 
+                            <div>
+                                <input type="date" className="form-control input-hola mb-1" id="DatePicker" />
+                                <div className="d-flex align-items-center">
+                                    <label htmlFor="duration" className="h5 text-nowrap text-pink me-2">Duration in minute: </label>
+                                    <input id="duration" type="number" inputMode="decimal" className="form-control input-hola"></input>
+                                </div>
+                            </div>}
+                            {!confirmedPast && <button className="btn btn-pink" onClick={()=>setConfirmedPast(true)}>Yes</button>}
+  
+</div>
+
+                        <hr className="hr-light" />
+                            </div>}
                         
+
                         <h5 className="text-pink">How hard did this workout feel</h5>
                         <div className="form-check container-three-cols">
                             {Rating.map((r) => (
@@ -356,9 +393,34 @@ function pauseTimer() {
                 <div className="text-center m-3"><button type="submit" className="btn btn-pink btn-lg">Finish</button></div></div>)
             }
         </form>
-
-    
     </div>
+<div
+    className="modal"
+    id="NewExercise"
+    tabIndex={-1}
+    aria-hidden="true"
+>
+    <div className="modal-dialog modal-lg">
+        <div className="modal-content">
+
+            <div className="modal-header">
+                <h5 className="modal-title text-pink">Create New Exercise</h5>
+
+                <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                />
+            </div>
+
+            <div className="modal-body">
+                <ExerciseGenerator />
+            </div>
+
+        </div>
+    </div>
+</div>
     </>
 }
 

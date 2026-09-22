@@ -22,6 +22,57 @@ function Records() {
         loadRecords();
     },[])
 
+    const [confirmDelete, setConfirmDelete] = useState<string|undefined>(undefined); 
+
+    const deleteWarning : ModalProps = {
+    title : "Delete Record", 
+    message : "Deleted record can't be recovered, do you still want to delete this record?", 
+    cancelButton : {
+      buttonDisplay : "Cancel",
+      buttonAction : () => setConfirmDelete(undefined),
+    },
+    confirmButton : {
+      buttonDisplay : "Confirm", 
+      buttonAction : ()=>{confirmDelete && deleteRecord(confirmDelete);}
+    }
+  }
+
+    const unknownUserModal : ModalProps= {
+    title : "Unknown User", 
+    message : "Please log in to find your workout history.", 
+    cancelButton : {
+      buttonDisplay : "Cancel",
+      buttonAction : () => navigate("/"),
+    },
+    confirmButton : {
+      buttonDisplay : "Log In", 
+      buttonAction : ()=>navigate("/logIn")
+    }
+  }
+  
+  async function deleteRecord(id:string) {
+    try {
+        if (confirmDelete) {
+            const res = await fetchHelper(`http://localhost:3000/api/strength-records/${id}`, true, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                }});
+            setConfirmDelete(undefined);
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.message);
+            }
+            await loadRecords();
+        }
+        else {
+            setConfirmDelete(id);
+    }
+    }catch(err) {
+        console.log(err);
+    }
+  }
+
     async function loadRecords() {
         try {
             const res = await fetchHelper("http://localhost:3000/api/strength-records", true, {});
@@ -35,15 +86,37 @@ function Records() {
         }
     }
 
+    
+
     return <>
+    {confirmDelete && <div><ReusableModal {...deleteWarning} /></div>}
+    {!user && <div><ReusableModal {...unknownUserModal}/></div>}
         <div>
-            <button className="btn btn-pink float-end" onClick={()=>setStarter(true)}>Start Exercising</button> 
+            <button className="btn btn-pink btn-lg float-end" onClick={()=>setStarter(true)}>Start Exercising</button> 
             <h1 className='text-pink'>Records</h1>
             <hr className="hr" />
         </div>
         <div>
             <h3 className="text-pink">History</h3>
-            {records.map((rec)=> <p className="text-pink">{rec.name}</p>)}
+            <div className="container-grid">
+            {records.map((rec)=> (<div>
+                <div className='card'>
+		<div className='card-header bg-pink'>
+            <button className="btn btn-pink float-end" onClick={()=>deleteRecord(rec._id)}>Delete</button>
+            <h5 className="text-pink">{rec.name}</h5>
+		</div>
+		<div className='card-body'>
+            {rec.rating && <p className="float-end">Rating: {rec.rating}</p>}
+            <p>Date: {new Date(rec.date).toLocaleDateString("en-AU")}</p>
+            <ul>
+                {rec.exercises.map(ex=>(<li>{ex.name}</li>))}
+            </ul>
+            {rec.comment && <p>{rec.comment}</p>}
+		</div>
+	</div>
+</div>
+                ))}
+                </div>
         </div>
         {showStarter && <div><ReusableModal {...modalDisplay} /></div>}
     </>

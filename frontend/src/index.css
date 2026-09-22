@@ -37,7 +37,6 @@
     font-size: 1rem;
     color: #fac5dd
 }
-
 .input-hola:focus {
     border-color: #fac5dd;
     color: #d96b9d;
@@ -153,6 +152,24 @@
     color: white;
 }
 
+.btn-pink-reverse {
+    background-color: transparent;
+    border-color: transparent;
+    color: #fac5dd;
+
+    --bs-btn-active-color: #d96b9d;
+    --bs-btn-active-bg: transparent;
+    --bs-btn-active-border-color: transparent;
+}
+.btn-pink-reverse:hover,
+.btn-pink-reverse:active,
+.btn-pink-reverse:selected,
+.btn-pink-reverse:focus {
+    background-color: transparent;
+    border-color: transparent;
+    color: #d96b9d;
+}
+
 
 .btn-light {
     color: #fac5dd;
@@ -189,6 +206,14 @@
   border: none;             /* Removes default border */
   height: 2px;              /* Sets line thickness */
   opacity: 0.8;               /* Overrides Bootstrap's default 0.25 opacity */
+}
+
+.hr-bar {
+    background-color: #fac5dd; /* Sets the color */
+    border: none;             /* Removes default border */
+    height: 2px;              /* Sets line thickness */
+    opacity: 0.8;   
+    margin-top: 0;
 }
 
 .hr-light {
@@ -272,5 +297,26 @@
 
 .muscle-option.active {
     background-color: #fac5dd;
+    color: #d96b9d;
     font-weight: 500;
+}
+
+.card-bg {
+    background-color: #fff4f8;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #fff2f7; /* light pink */
+    color: inherit;
+}
+
+.dropdown-item:active {
+    background-color: #fac5dd; /* main pink */
+    color: inherit;
+}
+
+.filter {
+    color: #fac5dd;
+
 }

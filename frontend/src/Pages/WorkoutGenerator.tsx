@@ -344,34 +344,33 @@ function WorkoutGenerator({editWorkout} : thisProp) {
                 </div>
             </div>
         </div> )}
-<div
-    className="modal"
-    id="NewExercise"
-    tabIndex={-1}
-    aria-hidden="true"
->
-    <div className="modal-dialog modal-lg">
-        <div className="modal-content">
+    <div
+        className="modal"
+        id="NewExercise"
+        tabIndex={-1}
+        aria-hidden="true"
+    >
+        <div className="modal-dialog modal-lg">
+            <div className="modal-content">
 
-            <div className="modal-header">
-                <h5 className="modal-title text-pink">Create New Exercise</h5>
+                <div className="modal-header">
+                    <h5 className="modal-title text-pink">Create New Exercise</h5>
 
-                <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                />
+                    <button
+                        type="button"
+                        className="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    />
+                </div>
+
+                <div className="modal-body">
+                    <ExerciseGenerator />
+                </div>
+
             </div>
-
-            <div className="modal-body">
-                <ExerciseGenerator />
-            </div>
-
         </div>
     </div>
-</div>
-
     </>
 }
 
