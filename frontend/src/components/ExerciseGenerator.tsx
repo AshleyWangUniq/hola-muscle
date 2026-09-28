@@ -24,6 +24,9 @@ function ExerciseGenerator({exercise} : thisProp) {
     const edit = exercise !== undefined;
     const [showModal, setShow] = useState<boolean>(false);
     const [created, setCreated] = useState<boolean>(false);
+    const [alertMuscle, setAlertMuscle] = useState<string | undefined>(undefined);
+    const [alertEquip, setAlertEquip] = useState<string | undefined>(undefined);
+    const [alertName, setAlertName] = useState<string | undefined>(undefined);
 
     const addedModal : ModalProps = {
         title:"Exercise Created",
@@ -50,7 +53,19 @@ function ExerciseGenerator({exercise} : thisProp) {
         setName(exercise.name);
     }
     },[exercise]);
-    
+
+    useEffect(()=> {
+        if (alertMuscle && muscleGroups.length !== 0) setAlertMuscle(undefined);
+    },[muscleGroups]);
+
+    useEffect(()=>{
+        if (alertEquip && equipment.length !== 0) setAlertEquip(undefined);
+    },[equipment]);
+
+    useEffect(()=>{
+        if (alertName && name !== "") setAlertName(undefined);
+    },[name]);
+
     function resetPage() {
         setCreated(false);
         setName("");
@@ -84,6 +99,20 @@ function ExerciseGenerator({exercise} : thisProp) {
                 }
             }
         } else {
+            let hasError = false;
+            if (name === "") {
+                setAlertName("Please enter a name for your exercise.");
+                hasError = true;
+            }
+            if (muscleGroups.length === 0) {
+                setAlertMuscle("Please select at least one targeted muscle.");
+                hasError = true;
+            }
+            if (equipment.length === 0) {
+                setAlertEquip("Please select at least one equipment, select bodyweight if no extra equipment needed.");
+                hasError = true;
+            }
+            if (hasError) return;
             const added = await addExercise({name, description, muscleGroups, equipment});
             if (added.status === 201) {
                 setCreated(true);
@@ -103,12 +132,13 @@ function ExerciseGenerator({exercise} : thisProp) {
         <hr className='hr' />
         <form onSubmit={handleSubmission}>
             <div className='form-group'>
-                <label className='text-pink'>Name</label>
+                <label className='text-pink'>Name*</label>
                 <input className="form-control input-hola" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 />
             </div>
+            {alertName && <div className="alert alert-warning m-4" role="alert">{alertName}</div> }
 
             <div className='form-group'>
                 <label className='text-pink'>Description</label>
@@ -120,7 +150,7 @@ function ExerciseGenerator({exercise} : thisProp) {
             </div>
 
             <div className='form-group'>
-                <label className='text-pink'>Targeted Muscle Groups</label>
+                <label className='text-pink'>Targeted Muscle Groups*</label>
                 <div className='container-grid'>
                 {MUSCLE_GROUPS.map((muscle) => (
                     <div className="form-check checkbox-container" key={muscle}>
@@ -135,10 +165,11 @@ function ExerciseGenerator({exercise} : thisProp) {
                         </div>
                 ))}
                 </div>
+                {alertMuscle && <div className="alert alert-warning m-4" role="alert">{alertMuscle}</div> }
             </div>
 
             <div className='form-group'>
-                <label className='text-pink'>Equipment</label>
+                <label className='text-pink'>Equipment*</label>
                 <div className='container-grid'>
                 {EQUIPMENT.map((equip) => (
                     <div className='form-check checkbox-container' key = {equip}>
@@ -150,6 +181,7 @@ function ExerciseGenerator({exercise} : thisProp) {
                     </div>
                 ))}
                 </div>
+                {alertEquip && <div className="alert alert-warning m-4" role="alert">{alertEquip}</div> }
             </div>
             <div className='d-flex justify-content-center'>
                 <button type = 'submit' className='btn btn-pink'>Submit</button>

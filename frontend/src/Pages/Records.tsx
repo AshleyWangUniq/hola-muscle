@@ -102,7 +102,7 @@ function Records() {
             {records.map((rec)=> (<div>
                 <div className='card'>
 		<div className='card-header bg-pink'>
-            <button className="btn btn-pink float-end" onClick={()=>deleteRecord(rec._id)}>Delete</button>
+            <button className="btn btn-pink btn-sm float-end" onClick={()=>deleteRecord(rec._id)}>Delete</button>
             <h5 className="text-pink">{rec.name}</h5>
 		</div>
 		<div className='card-body'>

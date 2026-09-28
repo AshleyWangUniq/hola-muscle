@@ -97,17 +97,26 @@ const forceDel : ModalProps = {
                 {displayExercises.map((exercise)=>(
                     // (mov.muscleGroups.includes(muscle)) && 
                     <div className='card small-container' key={exercise.name}>
-                        {/* <div className='card-body'>  */}
                             <div className='card-header d-flex justify-content-between bg-pink'>
                             <h5 className='card-title text-pink'>{exercise.name}</h5>
-                            {/* </div> */}
                             {!exercise.isPublic && 
-                            <div className='btn-group'>
-                                <button type="button" className='btn btn-sm me-1 btn-pink' onClick={() =>
+                            <div className='dropdown'>
+                                <button className='btn' data-bs-toggle="dropdown" aria-expanded="false"><i className="bi bi-three-dots-vertical text-pink"></i></button>
+                                <ul className='dropdown-menu'>
+                                    <li>
+                                        <button className='dropdown-item' type="button" onClick={() =>
                             navigate(`/EditExercise/${exercise._id}`)
                         }>Edit</button>
-                                <button type="button" className='btn btn-sm btn-pink' onClick={()=>showDeleteModal(exercise._id)}>Delete</button>
-                            </div>}
+                                    </li>
+                                     <li>
+                                        <button className='dropdown-item' type="button" onClick={()=>showDeleteModal(exercise._id)}>Delete</button>
+                                    </li> 
+                                    <li>
+                                        <button className='dropdown-item' type='button'>My Records</button>
+                                    </li>
+                                </ul>
+                            </div> 
+                            }
                             </div>
                             <div className='card-body'>
                             <p className='card-text'>{exercise.description}</p>
@@ -119,8 +128,7 @@ const forceDel : ModalProps = {
                             </h6>
                             <h6>Equipment: {exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
                             </div>
-                        {/* </div> */}
-                    </div>                        
+                        </div>
                 ))}
             </div>
         </div>
@@ -137,3 +145,10 @@ const forceDel : ModalProps = {
 }
 
 export default ExerciseDisplay;
+
+                            {/* <div className='btn-group'>
+                                <button type="button" className='btn btn-sm me-1 btn-pink' onClick={() =>
+                            navigate(`/EditExercise/${exercise._id}`)
+                        }>Edit</button>
+                                <button type="button" className='btn btn-sm btn-pink' onClick={()=>showDeleteModal(exercise._id)}>Delete</button>
+                            </div> */}

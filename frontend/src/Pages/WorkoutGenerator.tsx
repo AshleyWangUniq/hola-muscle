@@ -32,6 +32,10 @@ function WorkoutGenerator({editWorkout} : thisProp) {
     const [showSuccessModal, setShowModal] = useState(false);
     const exercisesOptions : ExOption[] = exercisesForOptions.map((exercise) => ({value: exercise._id, label: exercise.name}));
     const [repsMinAlert, setRepsMinAlert] = useState(false);
+    const [hasGoal, setHasGoal] = useState<string | undefined>(undefined);
+    const [hasEquip, setHasEquip] = useState<string | undefined>(undefined);
+    const [hasMuscle, setHasMuscle]  = useState<string | undefined>(undefined);
+    const [hasDiff, setHasDiff]  = useState<string | undefined>(undefined);
     const edit = editWorkout !== undefined;
 
     const modalProps : ModalProps = {
@@ -44,7 +48,7 @@ function WorkoutGenerator({editWorkout} : thisProp) {
     const successModal : ModalProps = {
         title : "Success", 
         message : "Your workout is successfully created", 
-        cancelButton : {buttonDisplay : "Close", buttonAction : ()=>navigate("/")},
+        cancelButton : {buttonDisplay : "Close", buttonAction : ()=>navigate("/WorkoutPage")},
         confirmButton : {buttonDisplay : "Create Another Exercise", buttonAction : ()=>reset()}
     }
 
@@ -58,6 +62,13 @@ function WorkoutGenerator({editWorkout} : thisProp) {
             setWorkout(editWorkout);
         }
     },[editWorkout]);
+
+    useEffect(()=>{
+        if (hasDiff && workout.difficulty) setHasDiff(undefined);
+        if (hasGoal && workout.goal.length !== 0) setHasGoal(undefined);
+        if (hasEquip && workout.equipment.length !== 0) setHasEquip(undefined);
+        if (hasMuscle && workout.muscleGroups.length !==0) setHasMuscle(undefined);
+    },[workout]);
 
     function reset() {
         setWorkout({name:"My Template", exercises: [], muscleGroups: [], equipment: [], goal: [], difficulty: ""});
@@ -85,14 +96,35 @@ function WorkoutGenerator({editWorkout} : thisProp) {
     }
     async function editSubmission() {
         if (!editWorkout) return;
+        if (checkMandatoryFields()) return;
         const finalValue : Workout = {...workout, _id: editWorkout._id, exercises: exercises};
         const res = await editInContext(finalValue);
         navigate(-1);
     }
 
+    function checkMandatoryFields() {
+        let hasError = false;
+        if (workout.muscleGroups.length === 0) {
+            setHasMuscle("Please Select At Least One Muslce");
+            hasError = true;
+        }
+        if (!workout.difficulty) {
+            setHasDiff("Please Select Defficulty Level");
+            hasError = true;
+        }
+        if (workout.equipment.length === 0) {
+            setHasEquip("Please Select At Least One Equipment, select bodyweight if no extra equipment needed");
+            hasError = true;
+        }
+        if (workout.goal.length === 0) {
+            setHasGoal("Please Select At Least One Goal");
+            hasError = true;
+        }
+        return hasError;
+    }
+
     async function generation() {
-        // e.preventDefault();
-        
+        if (checkMandatoryFields()) return;
         const finalValue: WorkoutGenerateType = {...workout, exercises: exercises};
         console.log("finalValue:", finalValue);
         const res = await generateWorkout(finalValue);
@@ -187,7 +219,7 @@ function WorkoutGenerator({editWorkout} : thisProp) {
     <input className="form-control input-hola mb-2 text-center" value={workout.name} onChange={(e)=>{setName(e.target.value)}}></input>
     <hr className='hr' />
     <div>
-    <h5 className="text-pink">Targeted Muscles</h5>
+    <h5 className="text-pink">Targeted Muscles*</h5>
     <div className="form-check container-three-cols">
         {MUSCLE_GROUPS.map((muscle)=> (
             <div key={muscle} className="form-check">
@@ -202,10 +234,11 @@ function WorkoutGenerator({editWorkout} : thisProp) {
             </div>
         ))} 
     </div>
+    {hasMuscle && <div><div className="alert alert-warning m-4" role="alert">{hasMuscle}</div></div>}
     </div>
     <hr className='hr' />
     <div>
-        <h5 className="text-pink">Goals</h5>
+        <h5 className="text-pink">Goals*</h5>
         <div className="form-check container-grid">
             {GOALS.map((goal) => (
                 <div key={goal}>
@@ -220,10 +253,11 @@ function WorkoutGenerator({editWorkout} : thisProp) {
             </div>
             ))}
         </div>
+        {hasGoal && <div><div className="alert alert-warning m-4" role="alert">{hasGoal}</div></div>}
     </div>
     <hr className='hr' />
     <div>
-        <h5 className="text-pink">Difficulty</h5>
+        <h5 className="text-pink">Difficulty*</h5>
         <div className="form-check container-three-cols">
         {DIFFICULTY.map((diff) => (
             <div key={diff}>
@@ -232,10 +266,11 @@ function WorkoutGenerator({editWorkout} : thisProp) {
             </div>
         )
         )} </div>
+        {hasDiff && <div><div className="alert alert-warning m-4" role="alert">{hasDiff}</div></div>}
     </div>
     <hr className='hr' />
     <div>
-        <h5 className="text-pink">Equipment</h5>
+        <h5 className="text-pink">Equipment*</h5>
         <div className="form-check container-three-cols">
             {EQUIPMENT.map((equip)=> (
                 <div key={equip}>
@@ -250,6 +285,7 @@ function WorkoutGenerator({editWorkout} : thisProp) {
                 </div>
             ))} 
         </div>
+        {hasEquip && <div><div className="alert alert-warning m-4" role="alert">{hasEquip}</div></div>}
     </div>
     <hr className='hr' />
     {exercises.map((exercise)=> (

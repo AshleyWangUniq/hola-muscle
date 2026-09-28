@@ -42,7 +42,6 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
         if (!res.ok) {
             alert(data.message);
             return res;
-            throw new Error(data);
         }
         
         const newWorkout : Workout = data;

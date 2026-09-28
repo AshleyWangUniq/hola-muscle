@@ -1,8 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { type AuthRequest, authMiddleware, optionalAuthMiddleware } from "./middleware/authMiddleware";
-import Workout from "./models/Workout";
 import { connectDB } from "./config/db";
 import exerciseRoutes from "./routes/exerciseRoutes";
 import userRoutes from "./routes/userRoutes";

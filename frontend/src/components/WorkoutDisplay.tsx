@@ -7,6 +7,8 @@ import { MUSCLE_GROUPS } from "../data/MuscleGroups";
 import { EQUIPMENT } from "../data/Equipment";
 import { GOALS } from "../data/FitnessGoals";
 import { DIFFICULTY } from "../data/Difficulty";
+import type { ModalProps } from "../types/reuseableModal";
+import ReusableModal from "./ReusableModal";
 
 function WorkoutDisplay() {
     const {workouts, deleteWorkout} = useWorkouts();
@@ -18,9 +20,21 @@ function WorkoutDisplay() {
     const [difficultyFilters, setDifficultyFilters] = useState<string[]>([]);
     const [goalFilters, setGoalFilters] = useState<string[]>([]);
 
+
+
+    const [confirmDel, setConfirmDel] = useState<ModalProps>();
+
+    function setDelete(id: string) {
+        setConfirmDel({title : "Delete Exercise?", 
+            message : "Do you want to delete the exercise?", 
+            cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>setConfirmDel(undefined)},
+            confirmButton : {buttonDisplay : "Yes", buttonAction : ()=>deleteThis(id)}})
+    }
+
     async function deleteThis(id : string) {
         deleteWorkout(id);
         setDeleteId(null);
+        setConfirmDel(undefined);
     }
     useEffect(()=>{refreshWorkouts()}, [muscleFilters, equipmentFilters, difficultyFilters,goalFilters]);
 
@@ -165,11 +179,25 @@ function WorkoutDisplay() {
                 <div className="card small-container" key={w.name}>
                     <div className="card-header d-flex justify-content-between bg-pink">
                         <h5 className="text-pink">{w.name}</h5>
-                        <div className="btn-group">
+                        {/* <div className="btn-group">
                             <button type="button" className="btn btn-pink btn-sm me-1" onClick={() =>navigate("/WorkoutDetail", {state: { workout: w }})}>Detail</button>
                             <button type="button" className="btn btn-pink btn-sm me-1" onClick={() => navigate(`/EditWorkout/${w._id}`)}>Edit</button>
-                            <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>(setDeleteId(w._id))}>Delete</button>
-                        </div>
+                            <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>setDelete(w._id)}>Delete</button>
+                        </div> */}
+                        <div className="dropdown">
+                            <button className="btn" data-bs-toggle="dropdown"  aria-expanded="false" type="button"><i className="bi bi-three-dots-vertical text-pink"></i></button>
+                            <ul className="dropdown-menu">
+                                <li>   
+                                    <button type="button" className="dropdown-item" onClick={() =>navigate("/WorkoutDetail", {state: { workout: w }})}>Detail</button>
+                                </li>
+                                <li>
+                                    <button type="button" className="dropdown-item" onClick={() => navigate(`/EditWorkout/${w._id}`)}>Edit</button>
+                                </li>
+                                <li>
+                                    <button id="w._id" className="dropdown-item" onClick={()=>setDelete(w._id)}>Delete</button>
+                                </li>
+                            </ul>
+                            </div>
                     </div>
                     <div className="card-body">
                         <p className="card-text">Difficulty: <span className="badge btn-pink me-1">{w.difficulty}</span></p>
@@ -184,7 +212,8 @@ function WorkoutDisplay() {
             </div>
         ))}
     </div>
-    {deleteId && (<div className="modal d-block">
+    {confirmDel && <ReusableModal {...confirmDel}/>}
+    {/* {deleteId && (<div className="modal d-block">
         <div className="modal-dialog">
             <div className="modal-content">
                 <div className="modal-header">
@@ -194,12 +223,12 @@ function WorkoutDisplay() {
                     <p>Do you want to delete this workout?</p>
                 </div>
                 <div className="modal-footer">
-                    <button onClick={()=>deleteThis(deleteId)}>Delete</button>
                     <button onClick={()=>setDeleteId(null)}>Cancel</button>
+                    <button onClick={()=>deleteThis(deleteId)}>Delete</button>
                 </div>
             </div>
         </div>
-    </div>)}
+    </div>)} */}
     </>;
     
 }
