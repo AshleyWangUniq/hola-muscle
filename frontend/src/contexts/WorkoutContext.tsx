@@ -20,6 +20,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
     const[workouts, setWorkouts] = useState<Workout[]>([]);
     const[loading, setLoading] = useState(false);
     const {user, fetchHelper} = useUser();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(()=> {
         void loadWorkouts();
@@ -30,7 +31,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
         try {
             setLoading(true);
             // const token = localStorage.getItem("token");
-            const res = await fetchHelper("http://localhost:3000/api/workouts/edit", true, {
+            const res = await fetchHelper(`${API_URL}/api/workouts/edit`, true, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
         try {
             setLoading(true);
             // const token = localStorage.getItem("token");
-            const res = await fetchHelper("http://localhost:3000/api/workouts", true, {
+            const res = await fetchHelper(`${API_URL}/api/workouts`, true, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -84,7 +85,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             setLoading(true);
 
             const token = localStorage.getItem("token");
-            const res = await fetchHelper(`http://localhost:3000/api/workouts/${id}`, true, {
+            const res = await fetchHelper(`${API_URL}/api/workouts/${id}`, true, {
                 method: "DELETE",
                 headers : {
                     Authorization: `Bearer ${token}`
@@ -126,7 +127,7 @@ export function WorkoutProvider({children}: {children: ReactNode}) {
             // if (token) {
             //     headers.Authorization = `Bearer ${token}`;
             // } 
-            const response = await fetchHelper(`http://localhost:3000/api/workouts`, false, 
+            const response = await fetchHelper(`${API_URL}/api/workouts`, false, 
                 {
                     method: "GET",
                     headers,

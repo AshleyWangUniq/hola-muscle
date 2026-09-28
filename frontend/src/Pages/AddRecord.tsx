@@ -90,7 +90,8 @@ async function submitRecord() {
     }
     const finalRecord : StrengthRecordGenerateType = {...record, exercises: recordExerices};
     console.log(finalRecord);
-    const res = await fetchHelper("http://localhost:3000/api/strength-records", true, {
+    const API_URL = import.meta.env.VITE_API_URL; 
+    const res = await fetchHelper(`${API_URL}/api/strength-records`, true, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(finalRecord),

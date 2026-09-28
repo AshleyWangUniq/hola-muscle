@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { User } from "../types/user";
 import Message from "../Message";
 
+
 interface UserCOntextType {
     user : User | null;
     loading : boolean;
@@ -49,6 +50,7 @@ export function UserProvider({children} : {children : ReactNode}) {
     // const {loadWorkouts} = useWorkouts();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         checkUser();
@@ -80,8 +82,7 @@ export function UserProvider({children} : {children : ReactNode}) {
             console.log("loading:", loading);
             const token = localStorage.getItem("token");
             if (!token) return;
-
-            const response = await fetch("http://localhost:3000/api/users", {
+            const response = await fetch(`${API_URL}/api/users`, {
                 method: "GET",
                 headers: {
                 Authorization: `Bearer ${token}`,
@@ -108,7 +109,7 @@ export function UserProvider({children} : {children : ReactNode}) {
             if (!user) throw new Error("No User Found");
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No Token Found");
-            const response = await fetch("http://localhost:3000/api/users/updateInfo", {
+            const response = await fetch(`${API_URL}/api/users/updateInfo`, {
             method:"POST",
             headers: {
                 "Content-Type": "application/json",
@@ -142,7 +143,7 @@ export function UserProvider({children} : {children : ReactNode}) {
     async function register(userInfo : registerUser) {
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:3000/api/users", {
+            const response = await fetch(`${API_URL}/api/users`, {
             method:"POST",
             headers: {
                 "Content-Type": "application/json",
@@ -172,7 +173,7 @@ export function UserProvider({children} : {children : ReactNode}) {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const response = await fetch("http://localhost:3000/api/users/resetPassword", {
+            const response = await fetch(`${API_URL}/api/users/resetPassword`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",
@@ -194,7 +195,7 @@ export function UserProvider({children} : {children : ReactNode}) {
             setLoading(true);
             const token = localStorage.getItem("token");
             if (!token) return {status: 401, message: "No Token Found"};
-            const res = await fetch("http://localhost:3000/api/users", {
+            const res = await fetch(`${API_URL}/api/users`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -224,7 +225,7 @@ export function UserProvider({children} : {children : ReactNode}) {
         try {
             setLoading(true);
             const {email, password} = credentials;
-            const response = await fetch("http://localhost:3000/api/users/login", {
+            const response = await fetch(`${API_URL}/api/users/login`, {
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json",

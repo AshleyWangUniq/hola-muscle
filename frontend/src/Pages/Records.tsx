@@ -11,6 +11,7 @@ function Records() {
     const [showStarter, setStarter] = useState(false);
     const [records, setRecords] = useState<StrengthRecord[]>([]);
     const {user, fetchHelper} = useUser();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     const modalDisplay : ModalProps = {
         title: "Starting...", 
@@ -53,7 +54,7 @@ function Records() {
   async function deleteRecord(id:string) {
     try {
         if (confirmDelete) {
-            const res = await fetchHelper(`http://localhost:3000/api/strength-records/${id}`, true, {
+            const res = await fetchHelper(`${API_URL}/api/strength-records/${id}`, true, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -75,7 +76,7 @@ function Records() {
 
     async function loadRecords() {
         try {
-            const res = await fetchHelper("http://localhost:3000/api/strength-records", true, {});
+            const res = await fetchHelper(`${API_URL}/api/strength-records`, true, {});
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data);

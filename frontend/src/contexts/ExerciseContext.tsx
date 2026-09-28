@@ -26,6 +26,8 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [loading, setLoading] = useState(false);
     const {user, fetchHelper} = useUser();
+    const API_URL = import.meta.env.VITE_API_URL;
+
 
     useEffect(()=>{
         refreshExercises();
@@ -42,7 +44,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     async function editExercise(id : string, {name, description, muscleGroups, equipment} : exerciseData) {
         try {
             setLoading(true);
-            const res = await fetchHelper("http://localhost:3000/api/exercises/edit", true, {
+            const res = await fetchHelper(`${API_URL}/api/exercises/edit`, true, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +71,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     async function refreshExercises() {
         try {
             setLoading(true);
-            const response = await fetchHelper(`http://localhost:3000/api/exercises`, false, {
+            const response = await fetchHelper(`${API_URL}/api/exercises`, false, {
                     method: "GET",
                     headers : {"Content-Type": "application/json"}
                 })
@@ -93,7 +95,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
         if (exists) {
             return {status: 409, message: "Exercise exists, please change exercise name"};
         }
-        const response = await fetchHelper("http://localhost:3000/api/exercises", true, {
+        const response = await fetchHelper(`${API_URL}/api/exercises`, true, {
             method: "POST",
             headers:{
                 "Content-Type": "application/json"
@@ -131,8 +133,8 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
             setLoading(true);
 
             const url = forceDeletion ? 
-            `http://localhost:3000/api/exercises/${id}?force=true`
-            : `http://localhost:3000/api/exercises/${id}`;
+            `${API_URL}/api/exercises/${id}?force=true`
+            : `${API_URL}/exercises/${id}`;
 
             const res = await fetchHelper(url, true, {
                 method: "DELETE",
