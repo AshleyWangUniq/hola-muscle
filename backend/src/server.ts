@@ -12,9 +12,14 @@ dotenv.config();
 const app = express();
 const route = express.Router();
 const PORT = process.env.PORT || 3000;
-// const MONGO_URI = process.env.MONGO_URI;
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+].filter((origin): origin is string => Boolean(origin));
 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins
+}));
 app.use(express.json());
 app.use(route);
 app.use("/api/exercises", exerciseRoutes);
