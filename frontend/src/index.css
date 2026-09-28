@@ -163,7 +163,6 @@
 }
 .btn-pink-reverse:hover,
 .btn-pink-reverse:active,
-.btn-pink-reverse:selected,
 .btn-pink-reverse:focus {
     background-color: transparent;
     border-color: transparent;

@@ -9,7 +9,7 @@ function NavBar() {
   const {user, logOut} = useUser();
     return <nav className="navbar sticky-top navbar-expand-md">
       <div className="container-fluid">
-      <Link className="navbar-brand" to={"/"}><img src="/src/assets/logo2.png" alt="logo" height="60" /></Link>
+      <Link className="navbar-brand" to={"/"}><img src="../assets/logo2.png" alt="logo" height="60" /></Link>
       <button className="navbar-toggler btn-pink"
         type="button" 
         data-bs-toggle="collapse"
