@@ -1,9 +1,7 @@
 
-import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useExercises } from '../contexts/ExerciseContext';
 import ExerciseGenerator from '../components/ExerciseGenerator';
-import type { Exercise } from '../types/exercise';
 import ReusableModal from '../components/ReusableModal';
 import type { ModalProps } from '../types/reuseableModal';
 

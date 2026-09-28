@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "../types/user";
-import Message from "../Message";
 
 
 interface UserCOntextType {
@@ -26,10 +25,7 @@ interface resetPasswordType {
     newPwd: string;
     confirmPwd: string;
 }
-interface responseType {
-    status: number;
-    msg: string;
-}
+
 interface logInProps {
     email : string;
     password : string;

@@ -31,7 +31,7 @@ function WorkoutGenerator({editWorkout} : thisProp) {
     const [confirmName, setConfirmName] = useState(false);
     const [showSuccessModal, setShowModal] = useState(false);
     const exercisesOptions : ExOption[] = exercisesForOptions.map((exercise) => ({value: exercise._id, label: exercise.name}));
-    const [repsMinAlert, setRepsMinAlert] = useState(false);
+    // const [repsMinAlert, setRepsMinAlert] = useState(false);
     const [hasGoal, setHasGoal] = useState<string | undefined>(undefined);
     const [hasEquip, setHasEquip] = useState<string | undefined>(undefined);
     const [hasMuscle, setHasMuscle]  = useState<string | undefined>(undefined);
@@ -99,7 +99,8 @@ function WorkoutGenerator({editWorkout} : thisProp) {
         if (checkMandatoryFields()) return;
         const finalValue : Workout = {...workout, _id: editWorkout._id, exercises: exercises};
         const res = await editInContext(finalValue);
-        navigate(-1);
+        if (res.ok) 
+            navigate(-1);
     }
 
     function checkMandatoryFields() {
@@ -333,9 +334,9 @@ function WorkoutGenerator({editWorkout} : thisProp) {
                 <input type="text" inputMode="decimal" className="form-control" value={set.reps ?? ""} onChange={(e) => {
                     const value = e.target.value;
 
-                    if (Number(value) < 1) {
-                        setRepsMinAlert(true);
-                    }
+                    // if (Number(value) < 1) {
+                    //     setRepsMinAlert(true);
+                    // }
                     changeSetReps(exercise.id, set.id, value)}}></input>
                 </div>
                 <div className="set-action-btn">

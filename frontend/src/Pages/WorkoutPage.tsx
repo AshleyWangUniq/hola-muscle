@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import type { Workout } from "../types/workout";
 import WorkoutDisplay from "../components/WorkoutDisplay";
 
  function WorkoutPage() {

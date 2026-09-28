@@ -1,5 +1,4 @@
 import type { Exercise } from "./exercise";
-import type { ExerciseForWorkout } from "./workout";
 
 export interface StrengthRecord {
     _id : string;

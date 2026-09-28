@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MUSCLE_GROUPS } from "../data/MuscleGroups";
 
 function MuscleList() {

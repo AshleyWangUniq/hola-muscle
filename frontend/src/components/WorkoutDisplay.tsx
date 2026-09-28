@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useWorkouts } from "../contexts/WorkoutContext";
-import WorkoutDetail from "../Pages/WorkoutDetail";
 import { useEffect, useState } from "react";
 import type { Workout } from "../types/workout";
 import { MUSCLE_GROUPS } from "../data/MuscleGroups";
@@ -14,7 +13,6 @@ function WorkoutDisplay() {
     const {workouts, deleteWorkout} = useWorkouts();
     const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>(workouts);
     const navigate = useNavigate();
-    const [deleteId, setDeleteId] = useState<string | null>(null);
     const [muscleFilters, setMuscleFilters] = useState<string[]>([]);
     const [equipmentFilters, setEquipmentFilters] = useState<string[]>([]);
     const [difficultyFilters, setDifficultyFilters] = useState<string[]>([]);
@@ -33,7 +31,6 @@ function WorkoutDisplay() {
 
     async function deleteThis(id : string) {
         deleteWorkout(id);
-        setDeleteId(null);
         setConfirmDel(undefined);
     }
     useEffect(()=>{refreshWorkouts()}, [muscleFilters, equipmentFilters, difficultyFilters,goalFilters]);
@@ -213,22 +210,6 @@ function WorkoutDisplay() {
         ))}
     </div>
     {confirmDel && <ReusableModal {...confirmDel}/>}
-    {/* {deleteId && (<div className="modal d-block">
-        <div className="modal-dialog">
-            <div className="modal-content">
-                <div className="modal-header">
-                    <h5 className="text-pink">Delete?</h5>
-                </div>
-                <div className="modal-body">
-                    <p>Do you want to delete this workout?</p>
-                </div>
-                <div className="modal-footer">
-                    <button onClick={()=>setDeleteId(null)}>Cancel</button>
-                    <button onClick={()=>deleteThis(deleteId)}>Delete</button>
-                </div>
-            </div>
-        </div>
-    </div>)} */}
     </>;
     
 }

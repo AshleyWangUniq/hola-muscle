@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useExercises } from '../contexts/ExerciseContext';
 import { Link, useNavigate  } from 'react-router-dom';
 import ReusableModal from './ReusableModal';

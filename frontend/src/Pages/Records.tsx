@@ -1,6 +1,5 @@
 import { type ModalProps } from "../types/reuseableModal";
 import ReusableModal from "../components/ReusableModal";
-import Message from "../Message";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { StrengthRecord } from "../types/strengthRecord";

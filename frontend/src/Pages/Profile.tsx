@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import type {ModalProps} from "../types/reuseableModal"
-import ReusableModal from "../components/ReusableModal";
+
 interface resetPasswords {
     oldPwd: string;
     newPwd: string;
