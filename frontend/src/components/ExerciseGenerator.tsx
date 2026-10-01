@@ -11,14 +11,15 @@ import type { Exercise } from '../types/exercise';
 
 interface thisProp{
     exercise ?: Exercise;
+    onSuccess ?: ()=>void;
 }
 
-function ExerciseGenerator({exercise} : thisProp) {
+function ExerciseGenerator({exercise, onSuccess} : thisProp) {
     const [name, setName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
     const [equipment, setEquipment] = useState<string[]>([]);
-    const { addExercise, editExercise} = useExercises();
+    const {addExercise, editExercise} = useExercises();
     const {user} = useUser();
     const navigate = useNavigate();
     const edit = exercise !== undefined;
@@ -31,7 +32,7 @@ function ExerciseGenerator({exercise} : thisProp) {
     const addedModal : ModalProps = {
         title:"Exercise Created",
         message: "Exercise is successfully created",
-        cancelButton : {buttonDisplay:"Close", buttonAction:()=>navigate(-1)},
+        cancelButton : {buttonDisplay:"Close", buttonAction:()=>onSuccess? onSuccess() :navigate(-1)},
         confirmButton : {buttonDisplay:"Create Another Exercise", buttonAction:()=>resetPage()}
     }
 
@@ -41,6 +42,7 @@ function ExerciseGenerator({exercise} : thisProp) {
         cancelButton : {buttonDisplay : "Calcel", buttonAction : ()=>setShow(false)},
         confirmButton : {buttonDisplay : "Confirm", buttonAction : () => navigate(-1)}
     })
+
 
     useEffect(()=>{
         window.scrollTo(0, 0);
@@ -74,15 +76,8 @@ function ExerciseGenerator({exercise} : thisProp) {
         setMuscleGroups([]);
     }
 
-    function checkValidation() {
-        return false;
-    }
-
-
     async function handleSubmission(e : React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
-        if (checkValidation()) {
-        }
         if (!user) {
             return;
         }  

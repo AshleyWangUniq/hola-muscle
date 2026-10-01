@@ -20,6 +20,43 @@ export interface StrengthRecordGenerateType {
     rating?: string;
     exercises: OneExercise[];
 }
+/* 
+assume the selected workout is named wkout 
+const [newRecord, setNewRecord] = usestate<StrengthRecordGenerateType>({
+name : wkout.name, date : new Date(), workoutRef: wkout._id, exercises: wkout.exercises.map(exinWK => {
+    const newId = crypto.randomUUID();
+    setNewRecord(prev => [...prev, {id: newId, exercise: exinWK.exercise, name: findExNameFromId(exinWK.exercise), sets: exinWK.sets.map((set, index) => ({
+    id : crypto.randomUUID(),
+    order: index+1,
+    dropOrder: 1,
+    reps: set.reps ?? 1,
+    weight: 0
+    }))}]);
+})
+})
+
+wkout.exercises.map(exinWK => {
+    const newId = crypto.randomUUID();
+    setNewRecord(prev => [...prev, {id: newId, exercise: exinWK.exercise, name: findExNameFromId(exinWK.exercise), sets: exinWK.sets.map((set, index) => ({
+    id : crypto.randomUUID(),
+    order: index+1,
+    dropOrder: 1,
+    reps: set.reps ?? 1,
+    weight: 0
+    }))}]);
+})
+
+
+function findExNameFromId(id: string) {
+    //find and return exericise name
+}
+*/
+
+
+
+
+
+
 
 export interface Set { // sets order is not acccessible with index
     id: string;

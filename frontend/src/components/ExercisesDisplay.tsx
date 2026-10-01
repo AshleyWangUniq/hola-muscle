@@ -52,7 +52,7 @@ const forceDel : ModalProps = {
     const displayExercises = muscle === "All" ? exercises : exercises.filter((exercise) => exercise.muscleGroups.includes(muscle));
 
     function resetBuffer() {
-        console.log("restting");
+        console.log("resetting");
         setdeleteBuffer({working: false, confirmDel:false, warningDisplay: false, exerciseId: ""});
     }
 
@@ -70,13 +70,19 @@ const forceDel : ModalProps = {
 
     //second step, connect to backend to delete
     async function deleteEx() {
+
         const response = await deleteExercise({id : deleteBuffer.exerciseId, forceDeletion : false});
         console.log(response);
         if (response) {
             if (response.ok) {
                 resetBuffer();
                 setShowDelete(true);
-            } else if (response.status === 409) {
+            } else if (response.status === 404){
+                
+            }
+            
+            
+            else if (response.status === 409) {
                 console.log("conflicting");
                 setdeleteBuffer(prev => ({...prev, warningDisplay: true}));
                 // takeBuffer(id);
@@ -104,9 +110,7 @@ const forceDel : ModalProps = {
                                 <button className='btn' data-bs-toggle="dropdown" aria-expanded="false"><i className="bi bi-three-dots-vertical text-pink"></i></button>
                                 <ul className='dropdown-menu'>
                                     <li>
-                                        <button className='dropdown-item' type="button" onClick={() =>
-                            navigate(`/EditExercise/${exercise._id}`)
-                        }>Edit</button>
+                                        <button className='dropdown-item' type="button" onClick={() => navigate(`/EditExercise/${exercise._id}`)}>Edit</button>
                                     </li>
                                      <li>
                                         <button className='dropdown-item' type="button" onClick={()=>showDeleteModal(exercise._id)}>Delete</button>

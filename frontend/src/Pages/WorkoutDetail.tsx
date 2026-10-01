@@ -85,10 +85,15 @@ export default function WorkoutDetail() {
                                             <div className="col-3 d-flex justify-content-center align-items-center">
                                                 <h5 className="text-pink text-center">Set {++index}</h5>
                                             </div>
-                                            <div className="col-8">
-                                                <ul className="list-group"><li className="list-group-item">{set.reps} reps</li>
-                                                <li className="list-group-item">{set.weight} kg</li></ul>
+                                            <div className="col-8 d-flex justify-content-center align-items-center">
+                                                <h5 className="text-pink text-center">{set.reps} reps</h5>
                                             </div>
+                                            {/* <div className="col-8">
+                                                <ul className="list-group">
+                                                    <li className="list-group-item">{set.reps} reps</li>
+                                                    <li className="list-group-item">{set.weight} kg</li>
+                                                </ul>
+                                            </div> */}
                                             </div>
                                         </li>
                                     ))}

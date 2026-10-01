@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useUser } from "../contexts/UserContext";
 import logo2 from "../assets/logo2.png";
 

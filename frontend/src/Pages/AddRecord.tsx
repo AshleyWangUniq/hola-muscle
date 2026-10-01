@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import ReusableModal from "../components/ReusableModal";
 import { Rating } from "../data/Rating";
 import ExerciseGenerator from "../components/ExerciseGenerator";
+// import type { Exercise } from "../types/exercise";
+import { Modal } from "bootstrap";
 
 interface ExOption {
     value: string;
@@ -169,10 +171,25 @@ function deleteExercise(id: string) {
     setExercises(prev => prev.filter((ex)=> ex.id !== id));
 }
 
+
+
 function startRecording() {
     setStartAt(Date.now());
 }
 
+function closeExerciseModal() {
+    const modal = document.getElementById("NewExercise");
+
+    if(!modal) return;
+
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+
+    if (modal) {
+        Modal.getOrCreateInstance(modal).hide();
+    }
+}
 /**
  * Add an empty set into the exericse
  * @param id exercise id
@@ -396,7 +413,7 @@ function pauseTimer() {
         </form>
     </div>
 <div
-    className="modal"
+    className="modal fade"
     id="NewExercise"
     tabIndex={-1}
     aria-hidden="true"
@@ -406,7 +423,6 @@ function pauseTimer() {
 
             <div className="modal-header">
                 <h5 className="modal-title text-pink">Create New Exercise</h5>
-
                 <button
                     type="button"
                     className="btn-close"
@@ -414,11 +430,9 @@ function pauseTimer() {
                     aria-label="Close"
                 />
             </div>
-
             <div className="modal-body">
-                <ExerciseGenerator />
+                <ExerciseGenerator onSuccess={closeExerciseModal}/>
             </div>
-
         </div>
     </div>
 </div>

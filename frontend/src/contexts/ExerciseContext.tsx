@@ -71,6 +71,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     async function refreshExercises() {
         try {
             setLoading(true);
+            console.log("refreshing exlist");
             const response = await fetchHelper(`${API_URL}/api/exercises`, false, {
                     method: "GET",
                     headers : {"Content-Type": "application/json"}
@@ -79,8 +80,9 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
                 throw new Error("Failed to fetch exercises");
             }
 
-            const exercises : Exercise[]= await response.json();
-            setExercises(exercises);
+            const refreshedExs : Exercise[]= await response.json();
+            console.log(refreshedExs);
+            setExercises(refreshedExs);
         // } catch (err) {
         //     console.error(err);
         } finally {
@@ -114,7 +116,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
         return {status: response.status, message: "new exercise created"};
     // } catch(err) {
     //     return {status: 500, message: err as string};
-    } finally{
+    } finally {
         setLoading(false);
     }
     }
@@ -131,10 +133,11 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
     {
         try {
             setLoading(true);
+            console.log(id);
 
             const url = forceDeletion ? 
             `${API_URL}/api/exercises/${id}?force=true`
-            : `${API_URL}/exercises/${id}`;
+            : `${API_URL}/api/exercises/${id}`;
 
             const res = await fetchHelper(url, true, {
                 method: "DELETE",
@@ -145,10 +148,12 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
             if (res.ok) {
                 setExercises(prev => prev.filter(exercise => exercise._id !== id));
             }
+            
+            if (res.status === 404) {
+                console.log("didn't find ex");
+                await refreshExercises();
+            }
             return res;
-        // } catch(err) {
-        //     console.log(err);
-        //     return ;
         } finally {
             setLoading(false);
         }
