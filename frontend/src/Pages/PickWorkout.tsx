@@ -1,4 +1,3 @@
-import { useState } from "react";
 import WorkoutDisplay from "../components/WorkoutDisplay";
 import type { StrengthRecordGenerateType } from "../types/strengthRecord";
 import { useWorkouts } from "../contexts/WorkoutContext";
@@ -7,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
  function PickWorkout() {
     const {workouts} = useWorkouts();
-    const {exercises, findExerciseById} = useExercises();
+    const { findExerciseById} = useExercises();
     const navigate = useNavigate();
 
     function findExName(id: string) {
