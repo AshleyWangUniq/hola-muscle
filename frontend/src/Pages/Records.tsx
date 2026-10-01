@@ -15,7 +15,7 @@ function Records() {
     const modalDisplay : ModalProps = {
         title: "Starting...", 
         message: "How do you want to start your workout",
-        cancelButton: {buttonDisplay: "From a workout template", buttonAction: ()=>navigate("/WorkoutPage")},
+        cancelButton: {buttonDisplay: "From a workout template", buttonAction: ()=> navigate("/PickWorkout")},
         confirmButton: {buttonDisplay: "From movements", buttonAction: ()=>navigate("/AddRecord")}
     }
     useEffect(()=>{

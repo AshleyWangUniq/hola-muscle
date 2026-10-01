@@ -4,7 +4,7 @@ import Select from "react-select";
 import { useExercises } from "../contexts/ExerciseContext";
 import { useUser } from "../contexts/UserContext";
 import type { ModalProps } from "../types/reuseableModal";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ReusableModal from "../components/ReusableModal";
 import { Rating } from "../data/Rating";
 import ExerciseGenerator from "../components/ExerciseGenerator";
@@ -20,16 +20,21 @@ interface showWorkingOn {
     workingOn : boolean;
     exId : string;
 }
+
+
 function AddRecord() {
+    const location = useLocation();
+    const passedRecord = location.state?.passedRecord as StrengthRecordGenerateType | undefined;
     const {user, fetchHelper} = useUser();
-    const [record, setRecord] = useState<StrengthRecordGenerateType>({name: "",
+    const [record, setRecord] = useState<StrengthRecordGenerateType>( passedRecord ?? {name: "",
         date: new Date(),
         exercises: []
     });
+    console.log(record);
     const [startAt, setStartAt] = useState<number | null>(null);
     const [elapsed, setElapsed] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [recordExerices, setExercises] = useState<OneExercise[]>([]);
+    const [recordExerices, setExercises] = useState<OneExercise[]>(passedRecord?.exercises ?? []);
     const groupedExs = recordExerices.map(ex => ({...ex,  groupedSet : ex.sets.reduce<Record<number, Set[]>>((groups, set)=>{
         if (!groups[set.order]) {
             groups[set.order] = [];
@@ -38,9 +43,12 @@ function AddRecord() {
         return groups;
     }, {})
     }));
+
+    console.log(groupedExs);
     const {exercises} = useExercises();
     const exOptions : ExOption[] = exercises.map((ex) => ({value: ex._id, label: ex.name}));
-    const [current, setCurrent] = useState<showWorkingOn>({workingOn: false, exId: ""});
+    const [current, setCurrent] = useState<showWorkingOn>(passedRecord?.exercises ? {workingOn: true, exId: ""} : {workingOn: false, exId: ""});
+
     const [deleteDisplay, setDeleteDisplay] = useState<string | null>(null);
     const deleteWarning : ModalProps = {
          title : "Delete Exercise",
@@ -286,7 +294,7 @@ function pauseTimer() {
                 </div>
                 <div className="col-9">
                     <div className='d-flex justify-content-center'>
-                        <input  type="text" className="form-control form-control-lg text-center input-hola" onChange={(e)=>setName(e.target.value)} placeholder={`Default Name: Workout ${record.date.toLocaleDateString("en-AU")}`}></input>
+                        <input  type="text" className="form-control form-control-lg text-center input-hola" value={record.name ?? ""} onChange={(e)=>setName(e.target.value)} placeholder={`Default Name: Workout ${record.date.toLocaleDateString("en-AU")}`}></input>
                     </div>
                 </div>
             </div>
@@ -308,7 +316,12 @@ function pauseTimer() {
                             </div>)}
                             <button className="btn btn-pink btn-sm fload-end" type="button" onClick={()=>setDeleteDisplay(ex.id)}>Delete</button>
                             {/* <button className="btn btn-pink btn-sm fload-end" type="button" onClick={()=>deleteExercise(ex.id)}>Delete</button> */}
-                            <Select className="mb-3 mt-1" isDisabled={current.exId !== ex.id} options={exOptions} onChange={(option) => {if (option) setExerciseName(option.value, option.label, ex.id);}}/>
+                            <Select className="mb-3 mt-1" 
+                                isDisabled={current.exId !== ex.id} 
+                                options={exOptions} 
+                                onChange={(option) => {if (option) setExerciseName(option.value, option.label, ex.id);}} 
+                                value={exOptions.find(option => option.value === ex.exercise) ?? null} 
+                            />
                         </div>
 
                         {current.workingOn && current.exId === ex.id && Object.entries(ex.groupedSet).map(([groups, groupedSets]) => (

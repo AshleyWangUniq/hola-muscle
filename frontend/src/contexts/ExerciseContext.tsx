@@ -81,7 +81,6 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
             }
 
             const refreshedExs : Exercise[]= await response.json();
-            console.log(refreshedExs);
             setExercises(refreshedExs);
         // } catch (err) {
         //     console.error(err);

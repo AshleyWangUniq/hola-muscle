@@ -9,7 +9,12 @@ import { DIFFICULTY } from "../data/Difficulty";
 import type { ModalProps } from "../types/reuseableModal";
 import ReusableModal from "./ReusableModal";
 
-function WorkoutDisplay() {
+interface Props {
+    pickingForExercising ?: Boolean;
+    pickedWorkout ?: (id : string) => void;
+}
+
+function WorkoutDisplay({pickedWorkout}: Props) {
     const {workouts, deleteWorkout} = useWorkouts();
     const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>(workouts);
     const navigate = useNavigate();
@@ -181,6 +186,7 @@ function WorkoutDisplay() {
                             <button type="button" className="btn btn-pink btn-sm me-1" onClick={() => navigate(`/EditWorkout/${w._id}`)}>Edit</button>
                             <button id="w._id" className="btn btn-pink btn-sm" onClick={()=>setDelete(w._id)}>Delete</button>
                         </div> */}
+                        {!pickedWorkout && 
                         <div className="dropdown">
                             <button className="btn" data-bs-toggle="dropdown"  aria-expanded="false" type="button"><i className="bi bi-three-dots-vertical text-pink"></i></button>
                             <ul className="dropdown-menu">
@@ -194,7 +200,8 @@ function WorkoutDisplay() {
                                     <button id="w._id" className="dropdown-item" onClick={()=>setDelete(w._id)}>Delete</button>
                                 </li>
                             </ul>
-                            </div>
+                        </div> }
+                        {pickedWorkout && <button type="button" className="btn btn-pink btn-sm" onClick={()=> pickedWorkout(w._id)}>Select</button>}
                     </div>
                     <div className="card-body">
                         <p className="card-text">Difficulty: <span className="badge btn-pink me-1">{w.difficulty}</span></p>
