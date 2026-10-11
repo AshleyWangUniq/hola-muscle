@@ -177,7 +177,7 @@ function WorkoutDisplay({pickedWorkout}: Props) {
     
     <div className="container-grid">
         {currentWorkouts.map((w)=>(
-            <div> 
+            <div key={w._id}> 
                 <div className="card small-container" key={w.name}>
                     <div className="card-header d-flex justify-content-between bg-pink">
                         <h5 className="text-pink">{w.name}</h5>
@@ -205,8 +205,8 @@ function WorkoutDisplay({pickedWorkout}: Props) {
                     </div>
                     <div className="card-body">
                         <p className="card-text">Difficulty: <span className="badge btn-pink me-1">{w.difficulty}</span></p>
-                        <p className="card-text">Targeted Muscle Groups: {w.muscleGroups.map((muscle)=>(<span className="badge btn-pink me-1">{muscle}</span>))}</p>
-                        <p className="card-text">Goals: {w.goal.map((goal)=>(<span className="badge btn-pink me-1">{goal}</span>))}</p>
+                        <p className="card-text">Targeted Muscle Groups: {w.muscleGroups.map((muscle)=>(<span className="badge btn-pink me-1" key={muscle}>{muscle}</span>))}</p>
+                        <p className="card-text">Goals: {w.goal.map((goal)=>(<span className="badge btn-pink me-1" key={goal}>{goal}</span>))}</p>
                         
                     </div>
                     {/* <div className="card-footer">

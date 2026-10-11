@@ -7,9 +7,20 @@ import { BrowserRouter } from 'react-router-dom'
 import { ExerciseProvider } from './contexts/ExerciseContext.tsx'
 import { WorkoutProvider } from './contexts/WorkoutContext.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
+import {ActiveWorkoutProvider} from './contexts/ActiveWorkoutContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter><UserProvider><ExerciseProvider><WorkoutProvider><App /></WorkoutProvider></ExerciseProvider></UserProvider></BrowserRouter>
+    <BrowserRouter>
+      <UserProvider>
+        <ExerciseProvider>
+          <WorkoutProvider>
+            <ActiveWorkoutProvider>
+              <App />
+            </ActiveWorkoutProvider>
+          </WorkoutProvider>
+        </ExerciseProvider>
+      </UserProvider>
+    </BrowserRouter>
   </StrictMode>,
 )

@@ -16,9 +16,9 @@ const exerciseSchema = new mongoose.Schema<IExercise>({
         required: true,
     },
 
-    description: {
+    description:{
         type:String,
-        required: true,
+        required: false,
     },
 
     muscleGroups:{

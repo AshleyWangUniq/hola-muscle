@@ -53,7 +53,7 @@ export async function getRecords(
 ) {
     try {
         if (!req.user) return res.status(401).json({ message: "No user found" });
-        const records = await StrengthRecord.find({belongsTo: req.user.id});
+        const records = await StrengthRecord.find({belongsTo: req.user.id}).sort({ date: -1 });
         return res.status(200).json(records);
     } catch(err) {
         return res.status(500).json({message: err});

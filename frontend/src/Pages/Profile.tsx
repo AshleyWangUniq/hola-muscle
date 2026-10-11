@@ -76,8 +76,6 @@ function Profile() {
     useEffect(()=>{
         if (loading) return;
         if (!user){
-            console.log("no user");
-            alert("no user");
             navigate("/");
         }
     },[user,loading]);
@@ -148,7 +146,7 @@ function Profile() {
                     <h5 className="modal-title text-pink">Delete User</h5>
                 </div>
                 <div className="modal-body">
-                    <p>You are deleting your user, please enter your password to continue: </p>
+                    <p>You're about to permanently delete your profile. Please enter your password to confirm.</p>
                     <input className='form-control' type="password" value={pwd} onChange={(e)=>setPwd(e.target.value)}></input>
                 </div>
                 <div className="modal-footer">

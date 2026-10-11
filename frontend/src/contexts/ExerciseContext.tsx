@@ -106,7 +106,7 @@ export function ExerciseProvider({children} : {children: ReactNode}) {
         const data = await response.json();
         if (!response.ok) {
             console.log(data.message);
-            // throw new Error(data);
+            return {status: response.status, message: data.message};
         } else {
             console.log("ex created");
         }

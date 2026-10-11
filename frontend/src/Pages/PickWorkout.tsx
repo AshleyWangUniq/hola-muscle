@@ -15,8 +15,6 @@ import { useNavigate } from "react-router-dom";
         return res.name;
     }
 
-    
-
     function recordConverter(id : string) {
         const wkout =  workouts.find(wk=>wk._id === id);
         if (!wkout) return;

@@ -8,8 +8,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ReusableModal from "../components/ReusableModal";
 import { Rating } from "../data/Rating";
 import ExerciseGenerator from "../components/ExerciseGenerator";
-// import type { Exercise } from "../types/exercise";
 import { Modal } from "bootstrap";
+import { useActiveWorkout } from "../contexts/ActiveWorkoutContext";
 
 interface ExOption {
     value: string;
@@ -21,20 +21,25 @@ interface showWorkingOn {
     exId : string;
 }
 
-
 function AddRecord() {
     const location = useLocation();
     const passedRecord = location.state?.passedRecord as StrengthRecordGenerateType | undefined;
-    const {user, fetchHelper} = useUser();
-    const [record, setRecord] = useState<StrengthRecordGenerateType>( passedRecord ?? {name: "",
-        date: new Date(),
-        exercises: []
+    const {currentRecord, status, startWorkout, updateRecord, finishWorkout, startTimer, pauseTimer, timerDisplay } = useActiveWorkout();
+    const {user} = useUser();
+
+    useEffect(()=> {
+        if (!currentRecord) startWorkout(passedRecord);
     });
-    console.log(record);
-    const [startAt, setStartAt] = useState<number | null>(null);
-    const [elapsed, setElapsed] = useState(0);
-    const [duration, setDuration] = useState(0);
+
     const [recordExerices, setExercises] = useState<OneExercise[]>(passedRecord?.exercises ?? []);
+    const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+    const {exercises} = useExercises();
+    const exOptions : ExOption[] = exercises.map((ex) => ({value: ex._id, label: ex.name}));
+    const [current, setCurrent] = useState<showWorkingOn>(passedRecord?.exercises ? {workingOn: true, exId: passedRecord.exercises.length > 0 ? passedRecord.exercises[0].id : ""} : {workingOn: false, exId: ""});
+    const [deleteDisplay, setDeleteDisplay] = useState<string | null>(null);
+    const [confirmedPast, setConfirmedPast] = useState(false);
+    const navigate = useNavigate();
+
     const groupedExs = recordExerices.map(ex => ({...ex,  groupedSet : ex.sets.reduce<Record<number, Set[]>>((groups, set)=>{
         if (!groups[set.order]) {
             groups[set.order] = [];
@@ -44,19 +49,12 @@ function AddRecord() {
     }, {})
     }));
 
-    console.log(groupedExs);
-    const {exercises} = useExercises();
-    const exOptions : ExOption[] = exercises.map((ex) => ({value: ex._id, label: ex.name}));
-    const [current, setCurrent] = useState<showWorkingOn>(passedRecord?.exercises ? {workingOn: true, exId: ""} : {workingOn: false, exId: ""});
-
-    const [deleteDisplay, setDeleteDisplay] = useState<string | null>(null);
     const deleteWarning : ModalProps = {
          title : "Delete Exercise",
         message : "Do you want to delete this exericse?",
         cancelButton : {buttonDisplay: "Cancel", buttonAction:()=>setDeleteDisplay(null)},
         confirmButton : {buttonDisplay: "Confirm", buttonAction:() => {if (deleteDisplay) deleteExercise(deleteDisplay)}}
     }
-    const navigate = useNavigate();
 
     const unknownUserModal : ModalProps = {
         title : "Unknown User", 
@@ -64,7 +62,6 @@ function AddRecord() {
         cancelButton : {buttonDisplay : "Cancel", buttonAction : ()=>navigate("/Records")},
         confirmButton : {buttonDisplay : "Log In", buttonAction : ()=>navigate("/logIn")}
     }
-    const [showConfirmFinish, setShowConfirmFinish] = useState(false);
 
     const confirmFinish : ModalProps = {
         title : "Confirm", 
@@ -73,205 +70,148 @@ function AddRecord() {
         confirmButton : {buttonDisplay : "Confirm", buttonAction : ()=>submitRecord()}
     }
 
-    const [confirmedPast, setConfirmedPast] = useState(false);
+    if (!currentRecord) return;
 
-    useEffect(()=> {
-        if (!startAt) return;
-
-        const interval = setInterval(()=> {
-            setDuration(Date.now() - startAt + elapsed);
-        }, 1000);
-
-        return ()=>clearInterval(interval);
-    }, [startAt]);
-
-//pop up a confirm finish window
-// If no name and other thing added, let user add in
-async function submitRecord() {
-    if (record.name === "") {
-        console.log("no name");
-        setRecord(prev => ({...prev, name: "Workout "+ record.date.toLocaleDateString("en-AU")}));
+    function finishRecording(e : React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+        pauseTimer();
+        setShowConfirmFinish(true);
     }
-    if (startAt) {
-        setDuration(Date.now() - startAt + elapsed);
+
+
+
+    /**
+     * 
+     * @param exId exercise id. 
+     * @param setOrder set order, optional, if exist, it will duplicate as a drop set
+     * @param reps optional reps
+     * @param weight optional weight 
+     */
+    function duplicateSet(exId: string, set : Set) {
+        const newSet : Set = {...set, id : crypto.randomUUID(), order: set.order + 1};
+        setExercises(prev => prev.map((ex) => {
+            if (ex.id !== exId) return ex;
+            const updatedSets = ex.sets.map((thisSet)=> thisSet.order > set.order ? {...thisSet, order: thisSet.order + 1} : thisSet);
+            
+            return {
+                ...ex,
+                sets: [...updatedSets, newSet]
+
+            }
+        }
+        ));    
     }
-    if (duration > 0) {
-        setRecord(prev => ({...prev, duration: Math.floor(duration/1000)}));
+
+    function addExercise() {
+        const newId = crypto.randomUUID();
+        setExercises(prev => [...prev, {id:  newId, exercise: "", name: "", sets: []}]);
+        setCurrent({workingOn: true, exId: newId});
     }
-    const finalRecord : StrengthRecordGenerateType = {...record, exercises: recordExerices};
-    console.log(finalRecord);
-    const API_URL = import.meta.env.VITE_API_URL; 
-    const res = await fetchHelper(`${API_URL}/api/strength-records`, true, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(finalRecord),
-    });
 
-    if (res.ok) navigate(-1);
-}
-
-//actual form submission
-function finishRecording(e : React.SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault();
-    pauseTimer();
-    setShowConfirmFinish(true);
-}
-
-function timeConverter(interval : number) {
-    const totalSeconds = Math.floor(interval / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    if (hours !== 0) {
-        return `${hours}:${minutes.toString()
-                .padStart(2, "0")}:${seconds.toString()
-                .padStart(2, "0")}`;
-    } else {
-        return `${minutes.toString()
-                .padStart(2, "0")}:${seconds.toString()
-                .padStart(2, "0")}`;
+    function deleteExercise(id: string) {
+        setDeleteDisplay(null);
+        setExercises(prev => prev.filter((ex)=> ex.id !== id));
     }
-    
-}
 
-/**
- * 
- * @param exId exercise id. 
- * @param setOrder set order, optional, if exist, it will duplicate as a drop set
- * @param reps optional reps
- * @param weight optional weight 
- */
-function duplicateSet(exId: string, set : Set) {
-    const newSet : Set = {...set, id : crypto.randomUUID(), order: set.order + 1};
-    setExercises(prev => prev.map((ex) => {
-        if (ex.id !== exId) return ex;
-        const updatedSets = ex.sets.map((thisSet)=> thisSet.order > set.order ? {...thisSet, order: thisSet.order + 1} : thisSet);
-        
-        return {
-            ...ex,
-            sets: [...updatedSets, newSet]
+    function closeExerciseModal() {
+        const modal = document.getElementById("NewExercise");
 
+        if(!modal) return;
+
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        if (modal) {
+            Modal.getOrCreateInstance(modal).hide();
         }
     }
-    ));    
-}
 
-function setName(name : string) {
-    setRecord(prev => ({...prev, name: name}));
-}
-
-function setRating(rating : string) {
-    setRecord(prev => ({...prev, rating: rating}));
-}
-
-function setComment(com : string) {
-    setRecord(prev => ({...prev, comment: com}));
-}
-
-function addExercise() {
-    const newId = crypto.randomUUID();
-    setExercises(prev => [...prev, {id:  newId, exercise: "", name: "", sets: []}]);
-    setCurrent({workingOn: true, exId: newId});
-}
-
-function deleteExercise(id: string) {
-    setDeleteDisplay(null);
-    setExercises(prev => prev.filter((ex)=> ex.id !== id));
-}
-
-
-
-function startRecording() {
-    setStartAt(Date.now());
-}
-
-function closeExerciseModal() {
-    const modal = document.getElementById("NewExercise");
-
-    if(!modal) return;
-
-    if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
+    /**
+     * Add an empty set into the exericse
+     * @param id exercise id
+     */
+    function addSetInitial(id : string, reps?: number, weight ?: number) {
+        const order = recordExerices.find((ex)=>ex.id === id)?.sets.reduce((max, set) => Math.max(max, set.order), 0);
+        setExercises(prev => prev.map((ex)=>ex.id === id ? {...ex, sets: [...ex.sets, {id: crypto.randomUUID(), order: Number(order)+1, dropOrder: 1, reps: reps ?? 1, weight: weight ?? 0}]} : ex));
     }
 
-    if (modal) {
-        Modal.getOrCreateInstance(modal).hide();
-    }
-}
-/**
- * Add an empty set into the exericse
- * @param id exercise id
- */
-function addSetInitial(id : string, reps?: number, weight ?: number) {
-    const order = recordExerices.find((ex)=>ex.id === id)?.sets.reduce((max, set) => Math.max(max, set.order), 0);
-    setExercises(prev => prev.map((ex)=>ex.id === id ? {...ex, sets: [...ex.sets, {id: crypto.randomUUID(), order: Number(order)+1, dropOrder: 1, reps: reps ?? 1, weight: weight ?? 0}]} : ex));
-}
+    function addDropSet(exId: string, setOrder: number, reps?: number, weight ?: number) {
+        let maxDropOrder = recordExerices.find((ex)=>ex.id === exId)?.sets.reduce((max, set) => {
+            if (set.order !== setOrder) {
+                return max;
+            }
+            if (!set.dropOrder) return max;
+            return Math.max(max, set.dropOrder);
+        }, 0);
+        if (!maxDropOrder) maxDropOrder = 0;
+        setExercises(prev => prev.map((ex)=>ex.id === exId ? {...ex, sets: [...ex.sets, {id: crypto.randomUUID(), order: Number(setOrder), dropOrder: maxDropOrder+1, reps: reps ?? 1, weight: weight ?? 0}]} : ex));
 
-function addDropSet(exId: string, setOrder: number, reps?: number, weight ?: number) {
-    let maxDropOrder = recordExerices.find((ex)=>ex.id === exId)?.sets.reduce((max, set) => {
-        if (set.order !== setOrder) {
-            return max;
+        // setExerci;ses(prev => prev.map((ex)=> ex.id === exId ? ))
+    }
+
+    function changeSetWeight(id: string, exId: string, value : string) {
+        setExercises(prev => prev.map((ex)=> ex.id === exId ? {...ex, sets: ex.sets.map((set)=> set.id === id ? {...set, weight : Number(value)} : set)} : ex));
+    }
+
+    function changeSetReps(id: string, exId: string, value : string) {
+        setExercises(prev => prev.map((ex)=> ex.id === exId ? {...ex, sets: ex.sets.map((set)=> set.id === id ? {...set, reps : Number(value)} : set)} : ex));
+    }
+
+    /**
+     * delete the set from sets, reorder the order for the set
+     * @param id set id
+     * @param ExId exercise id
+     */
+    function deleteSet(id: string, exId: string) {
+        setExercises(prev => prev.map(ex => {
+            if (ex.id !== exId) return ex;
+
+            const setDeleting = ex.sets.find(set => set.id === id);
+            if (!setDeleting) return ex;
+            const {order, dropOrder} = setDeleting;
+
+
+            const remainingSets = ex.sets.filter(set => set.id !== id);
+
+            const findOrder = remainingSets.some(set => set.order === order);
+            const newSets = findOrder ? remainingSets.map(set => 
+                set.order === order && set.dropOrder > dropOrder ? 
+                {...set, dropOrder: set.dropOrder-1} : set) : 
+                remainingSets.map(set => set.order > order? 
+                    {...set, order: set.order-1} : set);
+            return {
+                ...ex,
+                sets: newSets
+            };
+        }));
+    }
+
+    /**
+     * 
+     * @param refId exercise reference
+     * @param name exercise name
+     * @param id exercise record id
+     */
+    function setExerciseName(refId: string, name: string, exId: string) {
+        console.log("set exercising");
+        setExercises(prev => prev.map((ex) => ex.id===exId? {...ex, exercise: refId, name: name}: ex));
+    }
+
+    async function submitRecord() {
+        if (!currentRecord) return;
+
+        console.log(recordExerices);
+        // updateExercises(recordExerices);
+        const res = await finishWorkout(recordExerices);
+        if (!res) {
+            alert("Something went wrong, please try again later");
+            return;
         }
-        if (!set.dropOrder) return max;
-        return Math.max(max, set.dropOrder);
-    }, 0);
-    if (!maxDropOrder) maxDropOrder = 0;
-    setExercises(prev => prev.map((ex)=>ex.id === exId ? {...ex, sets: [...ex.sets, {id: crypto.randomUUID(), order: Number(setOrder), dropOrder: maxDropOrder+1, reps: reps ?? 1, weight: weight ?? 0}]} : ex));
-
-    // setExerci;ses(prev => prev.map((ex)=> ex.id === exId ? ))
-}
-
-function changeSetWeight(id: string, exId: string, value : string) {
-    setExercises(prev => prev.map((ex)=> ex.id === exId ? {...ex, sets: ex.sets.map((set)=> set.id === id ? {...set, weight : Number(value)} : set)} : ex));
-}
-
-function changeSetReps(id: string, exId: string, value : string) {
-    setExercises(prev => prev.map((ex)=> ex.id === exId ? {...ex, sets: ex.sets.map((set)=> set.id === id ? {...set, reps : Number(value)} : set)} : ex));
-}
-/**
- * delete the set from sets, reorder the order for the set
- * @param id set id
- * @param ExId exercise id
- */
-function deleteSet(id: string, exId: string) {
-    setExercises(prev => prev.map(ex => {
-        if (ex.id !== exId) return ex;
-
-        const setDeleting = ex.sets.find(set => set.id === id);
-        if (!setDeleting) return ex;
-        const {order, dropOrder} = setDeleting;
-
-
-        const remainingSets = ex.sets.filter(set => set.id !== id);
-
-        const findOrder = remainingSets.some(set => set.order === order);
-        const newSets = findOrder ? remainingSets.map(set => 
-            set.order === order && set.dropOrder > dropOrder ? 
-            {...set, dropOrder: set.dropOrder-1} : set) : 
-            remainingSets.map(set => set.order > order? 
-                {...set, order: set.order-1} : set);
-        return {
-            ...ex,
-            sets: newSets
-        };
-    }));
-}
-/**
- * 
- * @param refId exercise reference
- * @param name exercise name
- * @param id exercise record id
- */
-function setExerciseName(refId: string, name: string, exId: string) {
-    console.log("set exercising");
-    setExercises(prev => prev.map((ex) => ex.id===exId? {...ex, exercise: refId, name: name}: ex));
-}
-
-function pauseTimer() {
-    if (!startAt) return;
-    setElapsed(prev => prev+(Date.now() - startAt)); 
-    setStartAt(null);
-}
+        if (res.ok) {
+            navigate(-1);
+        }
+    }
 
     return <>
     <div className='container'>
@@ -281,20 +221,25 @@ function pauseTimer() {
         <form onSubmit={finishRecording}>
             <div className="row mb-2">
                 <div className="col-3">
-        {!startAt && elapsed === 0 &&
-                <button className="btn btn-pink" onClick={()=>startRecording()}>Start Timer</button>}
-            {!startAt && elapsed !== 0 && <div className="d-flex align-items-center gap-2">
-                <p className="text-pink">{timeConverter(elapsed)}</p>
-                <button className="btn btn-pink" onClick={()=>startRecording()}>Resume</button>
-                </div>}
-            {startAt && <div className="d-flex align-items-center gap-2 mb-2">
-                <p className="text-pink">{timeConverter(duration)}</p>
-                <button className="btn btn-pink" onClick={()=>pauseTimer()}>Pause</button>
-                </div>}
+                    {/* {!startAt && elapsed === 0 &&  */}
+                    {status === "Initiated" &&
+                    <button className="btn btn-pink" type="button" onClick={()=>startTimer()}>Start Timer</button>}
+                    {/* {!startAt && elapsed !== 0 &&  */}
+                    {status === "Paused" &&
+                    <div className="d-flex align-items-center gap-2">
+                        <p className="text-pink mb-0 fs-5">{timerDisplay}</p>  
+                        <button className="btn btn-pink" onClick={()=>startTimer()}>Resume</button>
+                        </div>}
+                    {/* {startAt && */}
+                    {status === "OnGoing" &&
+                     <div className="d-flex align-items-center gap-2 mb-2">
+                        <p className="text-pink mb-0 fs-5">{timerDisplay}</p>
+                        <button className="btn btn-pink" type="button" onClick={()=>pauseTimer()}>Pause</button>
+                    </div>}
                 </div>
                 <div className="col-9">
                     <div className='d-flex justify-content-center'>
-                        <input  type="text" className="form-control form-control-lg text-center input-hola" value={record.name ?? ""} onChange={(e)=>setName(e.target.value)} placeholder={`Default Name: Workout ${record.date.toLocaleDateString("en-AU")}`}></input>
+                        <input  type="text" className="form-control form-control-lg text-center input-hola" value={currentRecord.name ?? ""} onChange={(e)=>updateRecord({field: "name", content: e.target.value})} placeholder={`Default Name: Workout ${currentRecord.date.toLocaleDateString("en-AU")}`}></input>
                     </div>
                 </div>
             </div>
@@ -384,7 +329,9 @@ function pauseTimer() {
                 (<div>
                     <div>
                         <h3 className="text-pink mb-4">Summary</h3>
-                        {duration === 0 && elapsed === 0 && <div>
+                        {/* {duration === 0 && elapsed === 0 &&  */}
+                        {timerDisplay === null && 
+                        <div>
                             <h5 className="text-pink">Are you recording a past workout?</h5>
                         <div className="mb-3">
                             {confirmedPast && 
@@ -408,7 +355,7 @@ function pauseTimer() {
                             {Rating.map((r) => (
                                 <div key={r}>
                                     <div className="form-check">
-                                        <input className="form-check-input checkbox" type="radio" name="rating" id={r} checked={record.rating===r} onChange={()=>setRating(r)}/>
+                                        <input className="form-check-input checkbox" type="radio" name="rating" id={r} checked={currentRecord.rating===r} onChange={()=>updateRecord({field: "rating", content: r})}/>
                                         <label className="form-check-label" htmlFor={r}>{r}</label>
                                     </div>
                                 </div>
@@ -417,7 +364,7 @@ function pauseTimer() {
                         
                         <hr className="hr-light" />
                         <h5 className="text-pink">Comment</h5>
-                        <textarea className="form-control input-textarea" onChange={(e)=>setComment(e.target.value)}></textarea>
+                        <textarea className="form-control input-textarea" onChange={(e)=>updateRecord({field: "comment", content: e.target.value})}></textarea>
                         <hr className="hr-light" />
                     </div>
                     <hr className="hr" />

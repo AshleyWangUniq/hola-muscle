@@ -12,9 +12,13 @@ function MuscleList() {
     <h1 className="text-pink">Muscles</h1>
     </div>
     <ul className="list-group">
-        <button type="button" id={"all"} className="list-group-item  muscle-option" onClick={()=>toDetail("All")}>All</button>
+        <li className="list-group-item border-0 p-0" key="all">
+            <button type="button" id={"all"} className="btn muscle-option  w-100" onClick={()=>toDetail("All")}>All</button>
+        </li>
         {MUSCLE_GROUPS.map((item) => 
-            <button type="button" id={item} className="btn list-group-item muscle-option" onClick={()=>toDetail(item)}>{item}</button>
+        <li className="list-group-item border-0 p-0" key={item}>
+            <button type="button" id={item} className="btn muscle-option  w-100" onClick={()=>toDetail(item)}>{item}</button>
+        </li>
     )}
     </ul>
     </>;

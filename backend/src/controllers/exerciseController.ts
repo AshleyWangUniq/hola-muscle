@@ -12,7 +12,10 @@ export async function generateExercise(
   const {name, description, muscleGroups, equipment} = req.body;
   if (!req.user) return res.status(401).json({message: "No user found"});
   console.log(name);
-  const exist = await Exercise.findOne({name: name, belongsTo: req.user.id,});
+  const exist = await Exercise.findOne({name: {
+        $regex: `^${name}$`,
+        $options: "i"
+    }, belongsTo: req.user.id,});
 
   if (exist) {
     return res.status(401).json({message: "Exercise already exist"});

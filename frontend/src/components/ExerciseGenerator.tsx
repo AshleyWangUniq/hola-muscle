@@ -69,6 +69,7 @@ function ExerciseGenerator({exercise, onSuccess} : thisProp) {
     },[name]);
 
     function resetPage() {
+        window.scrollTo(0, 0);
         setCreated(false);
         setName("");
         setDescription("");
@@ -81,6 +82,7 @@ function ExerciseGenerator({exercise, onSuccess} : thisProp) {
         if (!user) {
             return;
         }  
+        setName(name.trim().replace(/\s+/g, " "));
         if (edit && exercise) {
             console.log("submit editing");
             const res = await editExercise(exercise._id, {name, description, muscleGroups, equipment});
@@ -90,6 +92,7 @@ function ExerciseGenerator({exercise, onSuccess} : thisProp) {
                     setModal(prev => ({...prev, title:"Exercise Updated",cancelButton:undefined}));
                 }
                 if (res.status === 304) {
+                    alert("No change made");
                     navigate(-1);
                 }
             }

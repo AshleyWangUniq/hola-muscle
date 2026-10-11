@@ -12,6 +12,8 @@ import { useWorkouts } from "../contexts/WorkoutContext";
 import ReusableModal from "../components/ReusableModal";
 import type {ModalProps } from "../types/reuseableModal";
 import type { WorkoutGenerateType, ExerciseForWorkout, Workout } from "../types/workout";
+import { Modal } from "bootstrap";
+
 
 interface ExOption {
     value: string;
@@ -213,6 +215,20 @@ function WorkoutGenerator({editWorkout} : thisProp) {
         setWorkout(prev => ({...prev, muscleGroups: workout.muscleGroups.filter(m => m !== muscle)}));
     }
 
+    function closeExerciseModal() {
+        const modal = document.getElementById("NewExercise");
+    
+        if(!modal) return;
+    
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    
+        if (modal) {
+            Modal.getOrCreateInstance(modal).hide();
+        }
+    }
+
     return <>
     {!user && <div><ReusableModal {...modalProps}/></div>}
     {showSuccessModal && <ReusableModal {...successModal} />}
@@ -402,7 +418,7 @@ function WorkoutGenerator({editWorkout} : thisProp) {
                 </div>
 
                 <div className="modal-body">
-                    <ExerciseGenerator />
+                    <ExerciseGenerator onSuccess={closeExerciseModal}/>
                 </div>
 
             </div>

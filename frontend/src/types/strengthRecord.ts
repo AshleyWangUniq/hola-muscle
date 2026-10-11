@@ -7,8 +7,8 @@ export interface StrengthRecord {
     duration?: number; // in seconds
     comment: string;
     workoutRef ?: string; // id of the workout
-    rating ?: number;
-    exercises : Exercise[];
+    rating ?: string;
+    exercises : OneExercise[];
 }
 
 export interface StrengthRecordGenerateType {
@@ -18,7 +18,7 @@ export interface StrengthRecordGenerateType {
     comment?: string;
     workoutRef ?: string; // id of the workout
     rating?: string;
-    exercises: OneExercise[];
+    exercises?: OneExercise[];
 }
 /* 
 assume the selected workout is named wkout 

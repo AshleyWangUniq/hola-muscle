@@ -127,10 +127,10 @@ const forceDel : ModalProps = {
                             </div>
                             <div className="card-footer bg-pink">
                             <h6>Targmeted Muscle Groups: {exercise.muscleGroups.map((muscle) => (
-                                <span className='badge text-bg-pink me-1'>{muscle}</span>
+                                <span className='badge text-bg-pink me-1' key={muscle}>{muscle}</span>
                             ))}
                             </h6>
-                            <h6>Equipment: {exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1'>{equipment}</span>))}</h6>
+                            <h6>Equipment: {exercise.equipment.map((equipment)=>(<span className='badge text-bg-pink me-1' key={equipment}>{equipment}</span>))}</h6>
                             </div>
                         </div>
                 ))}

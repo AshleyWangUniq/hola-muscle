@@ -148,13 +148,15 @@ export function UserProvider({children} : {children : ReactNode}) {
         });
 
         const result = await response.json();
+        console.log(result);
         if (response.ok) {
             localStorage.setItem("token", result.token);
-            setUser(result);
+            setUser(result.user);
             // return {status: 200, message: "suceessful"};
-        } else {
-            // return {status : response.status, message: result.message};
-        }
+        } 
+        // else {
+        //     // return {status : response.status, message: result.message};
+        // }
         return {status: response.status, message: result.message};
         // } catch(err) {
         //     console.log(err);
